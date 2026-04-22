@@ -50,8 +50,8 @@ function App() {
   return (
     <div className="app">
       <Hero />
-      <ShowcaseGrid items={showcases} onGenerate={handleGenerate} />
       <CreatePanel onGenerate={handleGenerate} />
+      <ShowcaseGrid items={showcases} onGenerate={handleGenerate} />
       <footer className="footer">
         <p>Powered by GPT-Image-2 &middot; Nano Banana AI</p>
       </footer>
