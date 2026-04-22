@@ -1,23 +1,15 @@
 import type { GenerateRequest, GenerateResult } from '../types'
 
-const API_BASE = import.meta.env.VITE_API_BASE || ''
-const API_KEY = import.meta.env.VITE_API_KEY || ''
-
 async function generateImageReal(req: GenerateRequest): Promise<GenerateResult> {
-  const res = await fetch(`${API_BASE}/v1/images/generations`, {
+  const res = await fetch('/api/generate', {
     method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'gpt-image-2',
-      prompt: req.prompt,
-    }),
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt: req.prompt }),
   })
 
   if (!res.ok) {
-    throw new Error(`API error: ${res.status}`)
+    const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
+    throw new Error(err.error || `API error: ${res.status}`)
   }
 
   const data = await res.json()
@@ -38,6 +30,6 @@ async function generateImageMock(req: GenerateRequest): Promise<GenerateResult> 
   }
 }
 
-const useMock = !API_BASE
+const useMock = import.meta.env.DEV
 
 export const generateImage = useMock ? generateImageMock : generateImageReal
