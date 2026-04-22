@@ -31,6 +31,7 @@ export function CreatePanel({ onGenerate }: CreatePanelProps) {
         >
           开始生成
         </button>
+        <p className="create-note">（首次免费，之后按次收费~）</p>
       </div>
     </section>
   )

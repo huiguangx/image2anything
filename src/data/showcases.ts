@@ -19,14 +19,14 @@ export const showcases: ShowcaseItem[] = [
     id: 'anime-girl',
     title: '商品设计',
     description: '生成商品介绍',
-    imageUrl: '/images/03-anime-girl.jpg',
+    imageUrl: '/images/03-product-design-v2.jpg',
     prompt: '生成阳澄湖大闸蟹的售卖海报',
   },
   {
     id: 'cyberpunk-city',
     title: '人物搞笑图片',
     description: '生成雷军出任苹果CEO的微博内容',
-    imageUrl: '/images/04-cyberpunk-city.jpg',
+    imageUrl: '/images/04-funny-person-v2.jpg',
     prompt: '生成雷军出任苹果CEO的微博内容',
   },
   {
@@ -40,7 +40,7 @@ export const showcases: ShowcaseItem[] = [
     id: 'portrait',
     title: '人物肖像',
     description: '生成电影级质感的艺术肖像照',
-    imageUrl: '/images/06-portrait.jpg',
+    imageUrl: '/images/06-person-portrait-v2.jpg',
     prompt: '生成特朗普抖音直播间带货的图片',
   },
   {

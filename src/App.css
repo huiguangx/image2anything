@@ -156,6 +156,12 @@
   align-self: flex-start;
 }
 
+.create-note {
+  font-size: 0.85rem;
+  color: #888;
+  margin-top: -0.35rem;
+}
+
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -295,33 +301,26 @@
   right: 2rem;
   background: linear-gradient(135deg, #12b7f5, #0d8ecf);
   color: #fff;
-  text-decoration: none;
-  border-radius: 50px;
-  padding: 0.6rem 1rem;
+  border-radius: 16px;
+  padding: 0.75rem 1rem;
   display: flex;
-  align-items: center;
-  gap: 0.4rem;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
   box-shadow: 0 4px 16px rgba(18, 183, 245, 0.3);
   z-index: 50;
-  transition: transform 0.2s, box-shadow 0.2s;
   font-size: 0.85rem;
 }
 
-.qq-float:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(18, 183, 245, 0.4);
-}
-
-.qq-icon {
-  font-weight: 700;
+.qq-title {
   font-size: 0.8rem;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
-  padding: 0.1rem 0.3rem;
+  opacity: 0.9;
 }
 
-.qq-text {
-  font-size: 0.85rem;
+.qq-number {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
 }
 
 /* Mobile */
@@ -369,7 +368,7 @@
   .qq-float {
     bottom: 1rem;
     right: 1rem;
-    padding: 0.5rem 0.75rem;
+    padding: 0.65rem 0.85rem;
     font-size: 0.8rem;
   }
 }
