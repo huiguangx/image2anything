@@ -80,7 +80,7 @@ function App() {
       <CreatePanel onGenerate={handleGenerate} />
       <ShowcaseGrid items={showcases} onGenerate={handleGenerate} />
       <footer className="footer">
-        <p>Powered by GPT-Image-2 &middot; Nano Banana AI</p>
+        <p>Powered by GPT-Image-2 &middot; Gpt Image 2.0</p>
       </footer>
       <a
         href="https://qm.qq.com/q/792496465"

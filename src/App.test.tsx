@@ -4,7 +4,7 @@ import App from './App'
 
 test('renders heading', () => {
   render(<App />)
-  expect(screen.getByText('Nano Banana AI')).toBeDefined()
+  expect(screen.getByText('Gpt Image 2.0')).toBeDefined()
 })
 
 test('renders showcase section', () => {
@@ -14,5 +14,5 @@ test('renders showcase section', () => {
 
 test('renders create section', () => {
   render(<App />)
-  expect(screen.getByText('自己创作')).toBeDefined()
+  expect(screen.getByText('实现梦想')).toBeDefined()
 })

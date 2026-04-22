@@ -3,10 +3,10 @@ import type { ShowcaseItem } from '../types'
 export const showcases: ShowcaseItem[] = [
   {
     id: 'fantasy-warrior',
-    title: '奇幻战士',
-    description: '生成史诗级奇幻角色立绘',
+    title: '洛克王国',
+    description: '生成一张洛克王国的海报',
     imageUrl: '/images/01-fantasy-warrior.jpg',
-    prompt: '生成一张史诗级奇幻战士的全身立绘，身穿华丽的暗金色铠甲，手持巨剑，背景是燃烧的战场与魔法光芒，电影级光影效果，高细节，8K画质。',
+    prompt: '生成一张洛克王国的海报',
   },
   {
     id: 'elden-ring',
@@ -17,10 +17,10 @@ export const showcases: ShowcaseItem[] = [
   },
   {
     id: 'anime-girl',
-    title: '动漫角色',
-    description: '生成精致的日系动漫角色插画',
+    title: '洛克王国',
+    description: '生成一张可爱的洛克王国海报',
     imageUrl: '/images/03-anime-girl.jpg',
-    prompt: '生成一张精致的日系动漫风格少女插画，大眼睛，精致五官，飘逸的长发，色彩鲜艳，背景梦幻，高质量赛璐璐风格上色，细节丰富。',
+    prompt: '生成一张可爱的洛克王国海报',
   },
   {
     id: 'cyberpunk-city',
