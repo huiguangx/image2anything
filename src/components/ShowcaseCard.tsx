@@ -17,18 +17,20 @@ export function ShowcaseCard({ item, onGenerate }: ShowcaseCardProps) {
           loading="lazy"
           referrerPolicy="no-referrer"
         />
+        {canGenerate && (
+          <div className="showcase-overlay">
+            <button
+              className="btn btn-primary generate-same-btn"
+              onClick={() => onGenerate(item.prompt!)}
+            >
+              做同款
+            </button>
+          </div>
+        )}
       </div>
       <div className="showcase-info">
         <h3>{item.title}</h3>
         {item.description && <p>{item.description}</p>}
-        {canGenerate && (
-          <button
-            className="btn btn-primary"
-            onClick={() => onGenerate(item.prompt!)}
-          >
-            生同款
-          </button>
-        )}
       </div>
     </div>
   )

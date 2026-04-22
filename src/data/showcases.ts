@@ -2,6 +2,13 @@ import type { ShowcaseItem } from '../types'
 
 export const showcases: ShowcaseItem[] = [
   {
+    id: 'beauty-photo',
+    title: '美女图片',
+    description: '生成栩栩如生的美女照片',
+    imageUrl: '/images/00-beauty-photo.png',
+    prompt: '生成一张成熟性感的穿黑丝的30岁的熟女照片',
+  },
+  {
     id: 'fantasy-warrior',
     title: '洛克王国',
     description: '生成一张洛克王国的海报',
@@ -45,7 +52,7 @@ export const showcases: ShowcaseItem[] = [
   },
   {
     id: 'landscape',
-    title: '风景大片',
+    title: '游戏联动',
     imageUrl: '/images/07-landscape.jpg',
   },
   {

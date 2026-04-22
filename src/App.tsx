@@ -77,8 +77,8 @@ function App() {
   return (
     <div className="app">
       <Hero />
-      <CreatePanel onGenerate={handleGenerate} />
       <ShowcaseGrid items={showcases} onGenerate={handleGenerate} />
+      <CreatePanel onGenerate={handleGenerate} />
       <footer className="footer">
         <p>Powered by GPT-Image-2 &middot; Gpt Image 2.0</p>
       </footer>
