@@ -6,7 +6,7 @@ export async function generateImage(req: GenerateRequest): Promise<GenerateResul
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ prompt: req.prompt }),
   })
-
+// a
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
     throw new Error(err.error || `生成失败: ${res.status}`)
