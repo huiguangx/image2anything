@@ -284,3 +284,98 @@
   color: #555;
   font-size: 0.85rem;
 }
+
+.qq-float {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background: linear-gradient(135deg, #12b7f5, #0d8ecf);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 50px;
+  padding: 0.6rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  box-shadow: 0 4px 16px rgba(18, 183, 245, 0.3);
+  z-index: 50;
+  transition: transform 0.2s, box-shadow 0.2s;
+  font-size: 0.85rem;
+}
+
+.qq-float:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(18, 183, 245, 0.4);
+}
+
+.qq-icon {
+  font-weight: 700;
+  font-size: 0.8rem;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  padding: 0.1rem 0.3rem;
+}
+
+.qq-text {
+  font-size: 0.85rem;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .app {
+    padding: 1rem;
+  }
+
+  .hero {
+    padding: 2rem 0 1.5rem;
+  }
+
+  .hero h1 {
+    font-size: 1.75rem;
+  }
+
+  .hero-subtitle {
+    font-size: 0.95rem;
+  }
+
+  .showcase-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+  }
+
+  .create-form textarea {
+    font-size: 0.9rem;
+  }
+
+  .modal-content {
+    width: 95%;
+    padding: 1.5rem;
+  }
+
+  .key-input-group {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .key-input {
+    width: 100%;
+    max-width: 200px;
+  }
+
+  .qq-float {
+    bottom: 1rem;
+    right: 1rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .showcase-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero h1 {
+    font-size: 1.5rem;
+  }
+}

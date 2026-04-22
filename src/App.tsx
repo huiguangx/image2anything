@@ -70,6 +70,16 @@ function App() {
       <footer className="footer">
         <p>Powered by GPT-Image-2 &middot; Nano Banana AI</p>
       </footer>
+      <a
+        href="https://qm.qq.com/q/792496465"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="qq-float"
+        aria-label="加入QQ群"
+      >
+        <span className="qq-icon">QQ</span>
+        <span className="qq-text">交流群</span>
+      </a>
       {showModal && (
         <GenerateModal
           loading={loading}
