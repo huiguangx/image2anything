@@ -5,7 +5,7 @@ import { CreatePanel } from './components/CreatePanel'
 import { GenerateModal } from './components/GenerateModal'
 import { PaymentModal } from './components/PaymentModal'
 import { generateImage } from './services/api'
-import { hasFreeTries, consumeOnce } from './services/quota'
+import { checkQuota, consumeQuota } from './services/quota'
 import { showcases } from './data/showcases'
 import type { GenerateResult } from './types'
 import './App.css'
@@ -18,7 +18,8 @@ function App() {
   const [error, setError] = useState<string | null>(null)
 
   const handleGenerate = async (prompt: string) => {
-    if (!hasFreeTries()) {
+    const hasFree = await checkQuota()
+    if (!hasFree) {
       setShowPayment(true)
       return
     }
@@ -30,7 +31,7 @@ function App() {
 
     try {
       const res = await generateImage({ prompt })
-      consumeOnce()
+      await consumeQuota()
       setResult(res)
     } catch (err) {
       setError(err instanceof Error ? err.message : '未知错误')

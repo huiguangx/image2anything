@@ -1,36 +1,24 @@
-const STORAGE_KEY = 'nano_banana_usage'
-const FREE_QUOTA = 1
-
-interface UsageData {
-  used: number
+interface QuotaResponse {
+  remaining: number
+  total: number
+  error?: string
 }
 
-function getUsage(): UsageData {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (raw) return JSON.parse(raw)
-  } catch {
-    // corrupted storage, treat as fresh
-  }
-  return { used: 0 }
+async function callQuotaApi(action: 'check' | 'consume'): Promise<QuotaResponse> {
+  const res = await fetch('/api/quota', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action }),
+  })
+  return res.json()
 }
 
-function setUsage(data: UsageData) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+export async function checkQuota(): Promise<boolean> {
+  const data = await callQuotaApi('check')
+  return data.remaining > 0
 }
 
-export function getRemainingFree(): number {
-  return Math.max(0, FREE_QUOTA - getUsage().used)
-}
-
-export function consumeOnce(): boolean {
-  const usage = getUsage()
-  if (usage.used >= FREE_QUOTA) return false
-  usage.used += 1
-  setUsage(usage)
-  return true
-}
-
-export function hasFreeTries(): boolean {
-  return getRemainingFree() > 0
+export async function consumeQuota(): Promise<boolean> {
+  const data = await callQuotaApi('consume')
+  return !data.error
 }
