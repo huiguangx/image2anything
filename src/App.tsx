@@ -19,6 +19,8 @@ function App() {
   const [keyError, setKeyError] = useState<string | null>(null)
   const pendingPrompt = useRef<string>('')
 
+  const [checking, setChecking] = useState(false)
+
   const doGenerate = async (prompt: string, key?: string) => {
     setShowPayment(false)
     setShowModal(true)
@@ -46,14 +48,19 @@ function App() {
   }
 
   const handleGenerate = async (prompt: string) => {
+    if (checking) return
     pendingPrompt.current = prompt
-
-    const isFree = await checkFree()
-    if (isFree) {
-      doGenerate(prompt)
-    } else {
-      setKeyError(null)
-      setShowPayment(true)
+    setChecking(true)
+    try {
+      const isFree = await checkFree()
+      if (isFree) {
+        doGenerate(prompt)
+      } else {
+        setKeyError(null)
+        setShowPayment(true)
+      }
+    } finally {
+      setChecking(false)
     }
   }
 
@@ -77,8 +84,8 @@ function App() {
   return (
     <div className="app">
       <Hero />
-      <CreatePanel onGenerate={handleGenerate} />
-      <ShowcaseGrid items={showcases} onGenerate={handleGenerate} />
+      <CreatePanel onGenerate={handleGenerate} disabled={checking} />
+      <ShowcaseGrid items={showcases} onGenerate={handleGenerate} disabled={checking} />
       <footer className="footer">
         <p>Powered by GPT-Image-2 &middot; Nano Banana AI</p>
       </footer>

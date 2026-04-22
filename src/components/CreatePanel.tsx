@@ -2,9 +2,10 @@ import { useState } from 'react'
 
 interface CreatePanelProps {
   onGenerate: (prompt: string) => void
+  disabled?: boolean
 }
 
-export function CreatePanel({ onGenerate }: CreatePanelProps) {
+export function CreatePanel({ onGenerate, disabled }: CreatePanelProps) {
   const [prompt, setPrompt] = useState('')
 
   const handleSubmit = () => {
@@ -27,9 +28,9 @@ export function CreatePanel({ onGenerate }: CreatePanelProps) {
         <button
           className="btn btn-primary"
           onClick={handleSubmit}
-          disabled={!prompt.trim()}
+          disabled={!prompt.trim() || disabled}
         >
-          开始生成
+          {disabled ? '处理中...' : '开始生成'}
         </button>
       </div>
     </section>

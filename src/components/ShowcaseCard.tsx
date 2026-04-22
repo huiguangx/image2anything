@@ -3,9 +3,10 @@ import type { ShowcaseItem } from '../types'
 interface ShowcaseCardProps {
   item: ShowcaseItem
   onGenerate: (prompt: string) => void
+  disabled?: boolean
 }
 
-export function ShowcaseCard({ item, onGenerate }: ShowcaseCardProps) {
+export function ShowcaseCard({ item, onGenerate, disabled }: ShowcaseCardProps) {
   return (
     <div className="showcase-card">
       <div className="showcase-image-wrapper">
@@ -22,8 +23,9 @@ export function ShowcaseCard({ item, onGenerate }: ShowcaseCardProps) {
         <button
           className="btn btn-primary"
           onClick={() => onGenerate(item.prompt)}
+          disabled={disabled}
         >
-          生同款
+          {disabled ? '处理中...' : '生同款'}
         </button>
       </div>
     </div>
