@@ -9,7 +9,7 @@ function getRedis() {
 }
 
 const KEYS_SET = 'image_keys'
-const FREE_QUOTA = 1
+const FREE_QUOTA = 2
 
 function fingerprint(req) {
   const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || 'unknown'
