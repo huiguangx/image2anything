@@ -1,7 +1,7 @@
 import type { GenerateRequest, GenerateResult } from '../types'
 
 function getGenerateUrl() {
-  const raw = (import.meta.env.VITE_IMAGE_API_URL || '/api/generate-image').trim()
+  const raw = (import.meta.env.VITE_IMAGE_API_URL || '/api/generate').trim()
   return raw.replace(/\/+$/, '')
 }
 
