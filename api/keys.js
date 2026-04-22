@@ -1,4 +1,5 @@
 import { Redis } from '@upstash/redis'
+import crypto from 'crypto'
 
 function getRedis() {
   const url = process.env.KV_REST_API_URL
@@ -8,6 +9,13 @@ function getRedis() {
 }
 
 const KEYS_SET = 'image_keys'
+const FREE_QUOTA = 1
+
+function fingerprint(req) {
+  const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || 'unknown'
+  const ua = req.headers['user-agent'] || ''
+  return 'free:' + crypto.createHash('sha256').update(`${ip}:${ua}`).digest('hex').slice(0, 16)
+}
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -18,10 +26,25 @@ export default async function handler(req, res) {
   const redis = getRedis()
 
   if (!redis) {
-    if (action === 'validate') {
-      return res.status(200).json({ valid: true, mock: true })
-    }
+    if (action === 'check_free') return res.status(200).json({ free: true, mock: true })
+    if (action === 'validate') return res.status(200).json({ valid: true, mock: true })
     return res.status(200).json({ ok: true, mock: true })
+  }
+
+  if (action === 'check_free') {
+    const fp = fingerprint(req)
+    const used = (await redis.get(fp)) || 0
+    return res.status(200).json({ free: Number(used) < FREE_QUOTA })
+  }
+
+  if (action === 'consume_free') {
+    const fp = fingerprint(req)
+    const used = (await redis.get(fp)) || 0
+    if (Number(used) >= FREE_QUOTA) {
+      return res.status(403).json({ error: 'free_exhausted' })
+    }
+    await redis.incr(fp)
+    return res.status(200).json({ ok: true })
   }
 
   if (action === 'validate') {

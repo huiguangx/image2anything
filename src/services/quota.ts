@@ -1,33 +1,28 @@
-const STORAGE_KEY = 'nano_banana_key'
-
-export function getSavedKey(): string {
-  return localStorage.getItem(STORAGE_KEY) || ''
-}
-
-export function saveKey(key: string) {
-  localStorage.setItem(STORAGE_KEY, key)
-}
-
-export function clearKey() {
-  localStorage.removeItem(STORAGE_KEY)
-}
-
-export async function validateKey(key: string): Promise<boolean> {
+async function callKeysApi(body: Record<string, unknown>) {
   const res = await fetch('/api/keys', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'validate', key }),
+    body: JSON.stringify(body),
   })
-  const data = await res.json()
+  return res.json()
+}
+
+export async function checkFree(): Promise<boolean> {
+  const data = await callKeysApi({ action: 'check_free' })
+  return !!data.free
+}
+
+export async function consumeFree(): Promise<boolean> {
+  const data = await callKeysApi({ action: 'consume_free' })
+  return !!data.ok
+}
+
+export async function validateKey(key: string): Promise<boolean> {
+  const data = await callKeysApi({ action: 'validate', key })
   return data.valid
 }
 
 export async function consumeKey(key: string): Promise<boolean> {
-  const res = await fetch('/api/keys', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'consume', key }),
-  })
-  const data = await res.json()
+  const data = await callKeysApi({ action: 'consume', key })
   return !!data.ok
 }
