@@ -3,18 +3,26 @@ import { Hero } from './components/Hero'
 import { ShowcaseGrid } from './components/ShowcaseGrid'
 import { CreatePanel } from './components/CreatePanel'
 import { GenerateModal } from './components/GenerateModal'
+import { PaymentModal } from './components/PaymentModal'
 import { generateImage } from './services/api'
+import { hasFreeTries, consumeOnce } from './services/quota'
 import { showcases } from './data/showcases'
 import type { GenerateResult } from './types'
 import './App.css'
 
 function App() {
   const [showModal, setShowModal] = useState(false)
+  const [showPayment, setShowPayment] = useState(false)
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<GenerateResult | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const handleGenerate = async (prompt: string) => {
+    if (!hasFreeTries()) {
+      setShowPayment(true)
+      return
+    }
+
     setShowModal(true)
     setLoading(true)
     setResult(null)
@@ -22,6 +30,7 @@ function App() {
 
     try {
       const res = await generateImage({ prompt })
+      consumeOnce()
       setResult(res)
     } catch (err) {
       setError(err instanceof Error ? err.message : '未知错误')
@@ -52,6 +61,9 @@ function App() {
           error={error}
           onClose={handleCloseModal}
         />
+      )}
+      {showPayment && (
+        <PaymentModal onClose={() => setShowPayment(false)} />
       )}
     </div>
   )

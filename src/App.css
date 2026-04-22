@@ -227,3 +227,29 @@
   font-size: 0.85rem;
   border-top: 1px solid #222;
 }
+
+.payment-modal {
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.payment-modal h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.75rem;
+  color: #f7d046;
+}
+
+.payment-modal p {
+  color: #999;
+  margin-bottom: 1.25rem;
+}
+
+.payment-modal .btn {
+  min-width: 160px;
+}
+
+.payment-coming-soon {
+  color: #666;
+  font-size: 0.9rem;
+  font-style: italic;
+}
