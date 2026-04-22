@@ -1,0 +1,53 @@
+name: Build & Deploy
+
+on:
+  push:
+    branches: [main]
+
+env:
+  IMAGE_NAME: nano-banana-demo
+  CONTAINER_NAME: nano-banana
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            --build-arg VITE_API_BASE=${{ secrets.VITE_API_BASE }} \
+            --build-arg VITE_API_KEY=${{ secrets.VITE_API_KEY }} \
+            -t ${{ env.IMAGE_NAME }}:latest .
+
+      - name: Save image as tar
+        run: docker save ${{ env.IMAGE_NAME }}:latest | gzip > image.tar.gz
+
+      - name: Copy image to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT || 22 }}
+          source: image.tar.gz
+          target: /tmp/
+
+      - name: Deploy on server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT || 22 }}
+          script: |
+            docker load < /tmp/image.tar.gz
+            docker stop ${{ env.CONTAINER_NAME }} 2>/dev/null || true
+            docker rm ${{ env.CONTAINER_NAME }} 2>/dev/null || true
+            docker run -d \
+              --name ${{ env.CONTAINER_NAME }} \
+              --restart unless-stopped \
+              -p 8080:80 \
+              ${{ env.IMAGE_NAME }}:latest
+            rm /tmp/image.tar.gz

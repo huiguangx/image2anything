@@ -1,0 +1,56 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm test)",
+      "Bash(pnpm test:*)",
+      "Bash(pnpm lint)",
+      "Bash(pnpm build)",
+      "Bash(pnpm install)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git branch*)",
+      "WebFetch(domain:zhuanlan.zhihu.com)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_snapshot",
+      "mcp__playwright__browser_evaluate",
+      "mcp__playwright__browser_close"
+    ],
+    "deny": [
+      "Bash(git push*)",
+      "Bash(rm -rf*)",
+      "Bash(kubectl*)",
+      "Bash(terraform*)",
+      "Bash(helm*)",
+      "Bash(docker push*)",
+      "Edit(dist/*)",
+      "Edit(.env*)",
+      "Edit(node_modules/*)",
+      "Edit(pnpm-lock.yaml)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/guard_write.sh \"$TOOL_INPUT\""
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/run_checks.sh \"$TOOL_INPUT\""
+          }
+        ]
+      }
+    ]
+  }
+}
