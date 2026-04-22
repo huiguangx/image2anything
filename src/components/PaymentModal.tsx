@@ -1,14 +1,20 @@
+import { useState } from 'react'
+
 interface PaymentModalProps {
   onClose: () => void
+  onKeySubmit: (key: string) => void
+  error?: string | null
 }
 
-const STORE_URL = import.meta.env.VITE_STORE_URL || ''
+const STORE_URL = 'https://pay.ldxp.cn/shop/W6P0CQSH'
 
-export function PaymentModal({ onClose }: PaymentModalProps) {
-  const handleGoStore = () => {
-    if (STORE_URL) {
-      window.open(STORE_URL, '_blank')
-    }
+export function PaymentModal({ onClose, onKeySubmit, error }: PaymentModalProps) {
+  const [key, setKey] = useState('')
+
+  const handleSubmit = () => {
+    const trimmed = key.trim()
+    if (!trimmed) return
+    onKeySubmit(trimmed)
   }
 
   return (
@@ -18,15 +24,41 @@ export function PaymentModal({ onClose }: PaymentModalProps) {
           &times;
         </button>
         <div className="payment-modal">
-          <h3>免费次数已用完</h3>
-          <p>您的 1 次免费体验已使用，前往小店购买更多次数</p>
-          {STORE_URL ? (
-            <button className="btn btn-primary" onClick={handleGoStore}>
-              前往购买
+          <h3>输入密钥开始生成</h3>
+          <p>购买密钥后输入即可生成图片，每个密钥可用一次</p>
+
+          <div className="key-input-group">
+            <input
+              type="text"
+              value={key}
+              onChange={(e) => setKey(e.target.value.toUpperCase())}
+              placeholder="输入 6 位密钥"
+              maxLength={6}
+              className="key-input"
+            />
+            <button
+              className="btn btn-primary"
+              onClick={handleSubmit}
+              disabled={key.trim().length < 6}
+            >
+              确认使用
             </button>
-          ) : (
-            <p className="payment-coming-soon">购买通道即将开放，敬请期待</p>
-          )}
+          </div>
+
+          {error && <p className="key-error">{error}</p>}
+
+          <div className="payment-divider">
+            <span>还没有密钥？</span>
+          </div>
+
+          <a
+            href={STORE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-secondary"
+          >
+            前往购买密钥
+          </a>
         </div>
       </div>
     </div>

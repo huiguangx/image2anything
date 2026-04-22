@@ -1,24 +1,33 @@
-interface QuotaResponse {
-  remaining: number
-  total: number
-  error?: string
+const STORAGE_KEY = 'nano_banana_key'
+
+export function getSavedKey(): string {
+  return localStorage.getItem(STORAGE_KEY) || ''
 }
 
-async function callQuotaApi(action: 'check' | 'consume'): Promise<QuotaResponse> {
-  const res = await fetch('/api/quota', {
+export function saveKey(key: string) {
+  localStorage.setItem(STORAGE_KEY, key)
+}
+
+export function clearKey() {
+  localStorage.removeItem(STORAGE_KEY)
+}
+
+export async function validateKey(key: string): Promise<boolean> {
+  const res = await fetch('/api/keys', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action }),
+    body: JSON.stringify({ action: 'validate', key }),
   })
-  return res.json()
+  const data = await res.json()
+  return data.valid
 }
 
-export async function checkQuota(): Promise<boolean> {
-  const data = await callQuotaApi('check')
-  return data.remaining > 0
-}
-
-export async function consumeQuota(): Promise<boolean> {
-  const data = await callQuotaApi('consume')
-  return !data.error
+export async function consumeKey(key: string): Promise<boolean> {
+  const res = await fetch('/api/keys', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'consume', key }),
+  })
+  const data = await res.json()
+  return !!data.ok
 }

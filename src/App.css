@@ -248,8 +248,39 @@
   min-width: 160px;
 }
 
-.payment-coming-soon {
-  color: #666;
-  font-size: 0.9rem;
-  font-style: italic;
+.key-input-group {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.key-input {
+  background: #2a2a3e;
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  color: #e0e0e0;
+  font-size: 1.1rem;
+  text-align: center;
+  letter-spacing: 0.3em;
+  width: 160px;
+  font-family: monospace;
+}
+
+.key-input:focus {
+  outline: none;
+  border-color: #f7d046;
+}
+
+.key-error {
+  color: #ff6b6b;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.payment-divider {
+  margin: 1.25rem 0;
+  color: #555;
+  font-size: 0.85rem;
 }
