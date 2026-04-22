@@ -30,6 +30,6 @@ async function generateImageMock(req: GenerateRequest): Promise<GenerateResult> 
   }
 }
 
-const useMock = import.meta.env.DEV
+const useMock = import.meta.env.DEV || import.meta.env.VITE_USE_MOCK === 'true'
 
 export const generateImage = useMock ? generateImageMock : generateImageReal

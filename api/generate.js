@@ -7,7 +7,10 @@ export default async function handler(req, res) {
   const API_KEY = process.env.API_KEY
 
   if (!API_BASE || !API_KEY) {
-    return res.status(500).json({ error: 'API not configured' })
+    return res.status(200).json({
+      data: [{ b64_json: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPj/HwADBwIAMCbHYQAAAABJRU5ErkJggg==' }],
+      mock: true,
+    })
   }
 
   try {
