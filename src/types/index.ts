@@ -1,9 +1,9 @@
 export interface ShowcaseItem {
   id: string
   title: string
-  description: string
+  description?: string
   imageUrl: string
-  prompt: string
+  prompt?: string
 }
 
 export interface GenerateRequest {
