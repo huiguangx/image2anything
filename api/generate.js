@@ -1,16 +1,8 @@
+import { generateImageWithFallback } from './_providers.js'
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
-  }
-
-  const API_BASE = process.env.API_BASE
-  const API_KEY = process.env.API_KEY
-
-  if (!API_BASE || !API_KEY) {
-    return res.status(200).json({
-      data: [{ b64_json: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPj/HwADBwIAMCbHYQAAAABJRU5ErkJggg==' }],
-      mock: true,
-    })
   }
 
   try {
@@ -20,25 +12,23 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'prompt is required' })
     }
 
-    const response = await fetch(`${API_BASE}/v1/images/generations`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-image-2',
-        prompt,
-      }),
-    })
-
-    if (!response.ok) {
-      const text = await response.text()
-      return res.status(response.status).json({ error: text })
+    const result = await generateImageWithFallback(prompt)
+    if (!result.ok) {
+      return res.status(result.statusCode || 500).json({
+        error: result.error,
+        attempts: result.attempts,
+      })
     }
 
-    const data = await response.json()
-    return res.status(200).json(data)
+    return res.status(200).json({
+      data: [{ b64_json: result.b64_json }],
+      meta: {
+        provider: result.provider,
+        responseId: result.meta?.responseId || null,
+        quality: result.meta?.finalCall?.quality || null,
+        revisedPrompt: result.meta?.finalCall?.revised_prompt || null,
+      },
+    })
   } catch (err) {
     return res.status(500).json({ error: err.message })
   }
