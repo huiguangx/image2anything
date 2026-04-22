@@ -48,115 +48,10 @@
   margin-bottom: 1.5rem;
 }
 
-.showcase-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 1.5rem;
-}
-
-.carousel-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.carousel-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 1px solid #444;
-  background: #1e1e2e;
-  color: #e0e0e0;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.carousel-btn:hover {
-  background: #2a2a3e;
-}
-
-.showcase-carousel {
-  overflow: hidden;
-  border-radius: 16px;
-}
-
-.showcase-track {
-  display: flex;
-  transition: transform 0.4s ease;
-}
-
-.showcase-slide {
-  min-width: 100%;
-}
-
-.carousel-dots {
-  display: flex;
-  justify-content: center;
-  gap: 0.5rem;
-  margin-top: 1rem;
-}
-
-.carousel-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  border: none;
-  background: #333;
-  cursor: pointer;
-  transition: background 0.2s, transform 0.2s;
-  padding: 0;
-}
-
-.carousel-dot.active {
-  background: #f7d046;
-  transform: scale(1.3);
-}
-
-.showcase-card-featured {
-  display: flex;
-  flex-direction: row;
-  border-radius: 16px;
-  min-height: 400px;
-}
-
-.showcase-card-featured:hover {
-  transform: none;
-}
-
-.showcase-image-featured {
-  flex: 1.2;
-  aspect-ratio: auto;
-}
-
-.showcase-info-featured {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 2rem;
-}
-
-.showcase-info-featured h3 {
-  font-size: 1.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.showcase-info-featured p {
-  font-size: 1rem;
-  line-height: 1.6;
-  margin-bottom: 1.25rem;
-}
-
-.showcase-badge {
-  display: inline-block;
-  background: rgba(247, 208, 70, 0.15);
-  color: #f7d046;
-  font-size: 0.75rem;
-  padding: 0.2rem 0.6rem;
-  border-radius: 4px;
-  margin-bottom: 0.75rem;
-  width: fit-content;
+.showcase-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
 }
 
 .showcase-card {
@@ -444,21 +339,8 @@
   }
 
   .showcase-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 1rem;
-  }
-
-  .showcase-card-featured {
-    flex-direction: column;
-    min-height: auto;
-  }
-
-  .showcase-info-featured {
-    padding: 1.25rem;
-  }
-
-  .showcase-info-featured h3 {
-    font-size: 1.2rem;
   }
 
   .create-form textarea {
@@ -491,5 +373,9 @@
 @media (max-width: 480px) {
   .showcase-grid {
     grid-template-columns: 1fr;
+  }
+
+  .hero h1 {
+    font-size: 1.5rem;
   }
 }
