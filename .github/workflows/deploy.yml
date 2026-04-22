@@ -21,6 +21,14 @@ jobs:
             --build-arg VITE_API_KEY=${{ secrets.VITE_API_KEY }} \
             -t ${{ env.IMAGE_NAME }}:latest .
 
+      - name: Extract static dist from image
+        run: |
+          rm -rf release-dist
+          mkdir -p release-dist
+          docker create --name ${{ env.IMAGE_NAME }}-extract ${{ env.IMAGE_NAME }}:latest
+          docker cp ${{ env.IMAGE_NAME }}-extract:/usr/share/nginx/html/. ./release-dist
+          docker rm ${{ env.IMAGE_NAME }}-extract
+
       - name: Save image as tar
         run: docker save ${{ env.IMAGE_NAME }}:latest | gzip > image.tar.gz
 
@@ -33,6 +41,17 @@ jobs:
           password: ${{ secrets.SERVER_PASSWORD }}
           port: ${{ secrets.SERVER_PORT || 22 }}
           source: image.tar.gz
+          target: /tmp/
+
+      - name: Copy static dist to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          port: ${{ secrets.SERVER_PORT || 22 }}
+          source: release-dist
           target: /tmp/
 
       - name: Deploy on server
@@ -52,4 +71,7 @@ jobs:
               --restart unless-stopped \
               -p 8080:80 \
               ${{ env.IMAGE_NAME }}:latest
+            printf '%s\n' '${{ secrets.SERVER_PASSWORD }}' | sudo -S mkdir -p /var/www/image2anything/dist
+            printf '%s\n' '${{ secrets.SERVER_PASSWORD }}' | sudo -S rsync -a --delete /tmp/release-dist/ /var/www/image2anything/dist/
+            rm -rf /tmp/release-dist
             rm /tmp/image.tar.gz
