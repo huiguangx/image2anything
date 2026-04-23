@@ -580,8 +580,69 @@ body::after {
   .create-form textarea { font-size: 0.9rem; }
 
   .modal-content {
-    width: 95%;
-    padding: 1.5rem;
+    width: 100%;
+    padding: 0.85rem 0.75rem;
+    max-height: calc(100dvh - 0.7rem);
+  }
+
+  .modal-slots {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+  }
+
+  .modal-slot {
+    padding: 0.5rem;
+  }
+
+  .modal-slot-header {
+    margin-bottom: 0.5rem;
+  }
+
+  .modal-slot-title {
+    font-size: 0.82rem;
+  }
+
+  .modal-slot-image,
+  .modal-slot-placeholder {
+    height: clamp(150px, 28vh, 220px);
+  }
+
+  .modal-slot-placeholder {
+    gap: 0.55rem;
+    padding: 0.75rem 0.5rem;
+  }
+
+  .modal-slot-spinner {
+    width: 30px;
+    height: 30px;
+    margin: 0 0 0.45rem;
+  }
+
+  .modal-loading-copy {
+    padding: 0 1.6rem;
+    font-size: 0.92rem;
+  }
+
+  .modal-slot-copy {
+    font-size: 0.8rem;
+    line-height: 1.45;
+  }
+
+  .modal-slot-error {
+    font-size: 0.7rem;
+  }
+
+  .modal-slot-actions {
+    margin-top: 0.55rem;
+  }
+
+  .modal-slot-actions .btn {
+    padding: 0.55rem 0.65rem;
+    font-size: 0.78rem;
+  }
+
+  .modal-result-actions {
+    flex-direction: column;
   }
 
   .key-input-group {
