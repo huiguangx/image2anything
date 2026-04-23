@@ -581,64 +581,65 @@ body::after {
 
   .modal-content {
     width: 100%;
-    padding: 1rem 0.85rem;
+    padding: 0.95rem 0.8rem;
     max-height: calc(100dvh - 0.7rem);
+    overflow-x: hidden;
   }
 
   .modal-slots {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.75rem;
+    gap: 0.68rem;
   }
 
   .modal-slot {
-    padding: 0.6rem;
+    padding: 0.56rem;
   }
 
   .modal-slot-header {
-    margin-bottom: 0.55rem;
+    margin-bottom: 0.5rem;
   }
 
   .modal-slot-title {
-    font-size: 0.88rem;
+    font-size: 0.84rem;
   }
 
   .modal-slot-image,
   .modal-slot-placeholder {
-    height: clamp(172px, 30vh, 248px);
+    height: clamp(160px, 27dvh, 224px);
   }
 
   .modal-slot-placeholder {
-    gap: 0.65rem;
-    padding: 0.9rem 0.65rem;
+    gap: 0.58rem;
+    padding: 0.82rem 0.58rem;
   }
 
   .modal-slot-spinner {
-    width: 34px;
-    height: 34px;
-    margin: 0 0 0.55rem;
+    width: 32px;
+    height: 32px;
+    margin: 0 0 0.48rem;
   }
 
   .modal-loading-copy {
     padding: 0 1.6rem;
-    font-size: 0.96rem;
+    font-size: 0.93rem;
   }
 
   .modal-slot-copy {
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     line-height: 1.45;
   }
 
   .modal-slot-error {
-    font-size: 0.74rem;
+    font-size: 0.72rem;
   }
 
   .modal-slot-actions {
-    margin-top: 0.65rem;
+    margin-top: 0.58rem;
   }
 
   .modal-slot-actions .btn {
-    padding: 0.62rem 0.75rem;
-    font-size: 0.82rem;
+    padding: 0.58rem 0.7rem;
+    font-size: 0.8rem;
   }
 
   .modal-result-actions {
@@ -660,5 +661,51 @@ body::after {
     right: 1rem;
     padding: 0.65rem 0.85rem;
     font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 420px), (max-width: 768px) and (max-height: 760px) {
+  .modal-content {
+    padding: 0.88rem 0.72rem;
+  }
+
+  .modal-slots {
+    gap: 0.58rem;
+  }
+
+  .modal-slot {
+    padding: 0.5rem;
+  }
+
+  .modal-slot-title {
+    font-size: 0.8rem;
+  }
+
+  .modal-slot-image,
+  .modal-slot-placeholder {
+    height: clamp(146px, 24dvh, 196px);
+  }
+
+  .modal-slot-placeholder {
+    padding: 0.72rem 0.48rem;
+  }
+
+  .modal-slot-spinner {
+    width: 30px;
+    height: 30px;
+  }
+
+  .modal-loading-copy {
+    padding: 0 1.2rem;
+    font-size: 0.9rem;
+  }
+
+  .modal-slot-copy {
+    font-size: 0.78rem;
+  }
+
+  .modal-slot-actions .btn {
+    font-size: 0.78rem;
+    padding: 0.54rem 0.62rem;
   }
 }
