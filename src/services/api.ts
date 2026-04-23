@@ -1,6 +1,5 @@
 import type { GenerateRequest, GenerateResult } from '../types'
 
-const GENERATE_TIMEOUT_MS = 160000
 const MODEL_CAPACITY_ERROR = '当前模型资源有点紧张，辛苦您再试一次～'
 const MODEL_CAPACITY_RETRY_HINT = `${MODEL_CAPACITY_ERROR} 如果现在人太多，过一会儿再试更容易成功。`
 
@@ -46,34 +45,14 @@ export async function generateImage(
   req: GenerateRequest,
   options?: { signal?: AbortSignal }
 ): Promise<GenerateResult> {
-  const controller = new AbortController()
-  let timedOut = false
-  let rejectOnTimeout: ((reason?: unknown) => void) | null = null
-  const timeoutPromise = new Promise<never>((_, reject) => {
-    rejectOnTimeout = reject
-  })
-  const timer = window.setTimeout(() => {
-    timedOut = true
-    controller.abort(new DOMException('timeout', 'AbortError'))
-    rejectOnTimeout?.(new Error(MODEL_CAPACITY_RETRY_HINT))
-  }, GENERATE_TIMEOUT_MS)
   const externalSignal = options?.signal
-  const forwardAbort = () => controller.abort(externalSignal?.reason || 'cancelled')
 
-  if (externalSignal) {
-    if (externalSignal.aborted) {
-      controller.abort(externalSignal.reason || 'cancelled')
-    } else {
-      externalSignal.addEventListener('abort', forwardAbort, { once: true })
-    }
-  }
-
-  const requestPromise = (async (): Promise<GenerateResult> => {
+  try {
     const res = await fetch(getGenerateUrl(), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ prompt: req.prompt }),
-      signal: controller.signal,
+      signal: externalSignal,
     })
 
     if (!res.ok) {
@@ -103,20 +82,12 @@ export async function generateImage(
       imageUrl: finalImageUrl,
       prompt: req.prompt,
     }
-  })()
-
-  try {
-    return await Promise.race([requestPromise, timeoutPromise])
   } catch (error) {
-    if (timedOut) {
-      throw new Error(MODEL_CAPACITY_RETRY_HINT)
-    }
-
     if (error instanceof DOMException && error.name === 'AbortError') {
       if (externalSignal?.aborted) {
         throw error
       }
-      throw new Error(MODEL_CAPACITY_RETRY_HINT)
+      throw error
     }
 
     if (error instanceof TypeError) {
@@ -124,8 +95,5 @@ export async function generateImage(
     }
 
     throw error
-  } finally {
-    window.clearTimeout(timer)
-    externalSignal?.removeEventListener('abort', forwardAbort)
   }
 }

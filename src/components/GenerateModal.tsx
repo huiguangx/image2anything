@@ -35,7 +35,7 @@ export function GenerateModal({ loading, result, error, onClose, onRetry }: Gene
       ? '已经收到您的超绝想法，正在出图中！(๑•̀ㅂ•́)و✧'
       : elapsedSeconds < 60
         ? '请您耐心等待，正在为您出超绝美图 (≧▽≦)♡'
-        : '太火爆啦，模型正在排队出图中。如果超过3分钟还没完成，建议您重新试一次喔！(｡•̀ᴗ-)✧'
+        : '太火爆啦，模型正在努力生成中，请您再耐心等一下喔！(｡•̀ᴗ-)✧'
 
   return (
     <div className="modal-overlay" onClick={onClose}>
