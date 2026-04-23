@@ -3,9 +3,10 @@ import type { ShowcaseItem } from '../types'
 interface ShowcaseCardProps {
   item: ShowcaseItem
   onGenerate: (prompt: string) => void
+  loading: boolean
 }
 
-export function ShowcaseCard({ item, onGenerate }: ShowcaseCardProps) {
+export function ShowcaseCard({ item, onGenerate, loading }: ShowcaseCardProps) {
   const canGenerate = Boolean(item.prompt)
 
   return (
@@ -21,9 +22,10 @@ export function ShowcaseCard({ item, onGenerate }: ShowcaseCardProps) {
           <div className="showcase-overlay">
             <button
               className="btn btn-primary generate-same-btn"
+              disabled={loading}
               onClick={() => onGenerate(item.prompt!)}
             >
-              做同款
+              {loading ? '生成中...' : '做同款'}
             </button>
           </div>
         )}

@@ -252,6 +252,18 @@
   color: #ff6b6b;
 }
 
+.modal-error-copy {
+  margin-top: 0.65rem;
+  color: #f3f3f3;
+  line-height: 1.6;
+}
+
+.modal-error-hint {
+  margin-top: 0.5rem;
+  color: #c9c9d6;
+  line-height: 1.5;
+}
+
 .modal-result img {
   width: 100%;
   border-radius: 8px;

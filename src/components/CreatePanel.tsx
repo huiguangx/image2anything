@@ -2,9 +2,10 @@ import { useState } from 'react'
 
 interface CreatePanelProps {
   onGenerate: (prompt: string) => void
+  loading: boolean
 }
 
-export function CreatePanel({ onGenerate }: CreatePanelProps) {
+export function CreatePanel({ onGenerate, loading }: CreatePanelProps) {
   const [prompt, setPrompt] = useState('')
 
   const handleSubmit = () => {
@@ -27,9 +28,9 @@ export function CreatePanel({ onGenerate }: CreatePanelProps) {
         <button
           className="btn btn-primary"
           onClick={handleSubmit}
-          disabled={!prompt.trim()}
+          disabled={loading || !prompt.trim()}
         >
-          开始生成
+          {loading ? '生成中...' : '开始生成'}
         </button>
         <p className="create-note">（前两次免费，之后按次收费~）</p>
       </div>
