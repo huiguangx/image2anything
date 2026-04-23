@@ -1,4 +1,4 @@
-# Outside Dog
+# Gpt AI 万物图
 
 Vite + React + TypeScript web app.
 

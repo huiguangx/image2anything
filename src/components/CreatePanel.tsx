@@ -16,7 +16,7 @@ export function CreatePanel({ onGenerate, disabled }: CreatePanelProps) {
 
   return (
     <section className="create-section">
-      <h2>自己创作</h2>
+      <h2>实现梦想</h2>
       <p className="section-subtitle">输入你的创意描述，AI 帮你生成</p>
       <div className="create-form">
         <textarea
@@ -32,6 +32,7 @@ export function CreatePanel({ onGenerate, disabled }: CreatePanelProps) {
         >
           {disabled ? '处理中...' : '开始生成'}
         </button>
+        <p className="create-note">（前两次免费，之后按次收费~）</p>
       </div>
     </section>
   )

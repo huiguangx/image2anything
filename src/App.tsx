@@ -19,8 +19,6 @@ function App() {
   const [keyError, setKeyError] = useState<string | null>(null)
   const pendingPrompt = useRef<string>('')
 
-  const [checking, setChecking] = useState(false)
-
   const doGenerate = async (prompt: string, key?: string) => {
     setShowPayment(false)
     setShowModal(true)
@@ -48,19 +46,14 @@ function App() {
   }
 
   const handleGenerate = async (prompt: string) => {
-    if (checking) return
     pendingPrompt.current = prompt
-    setChecking(true)
-    try {
-      const isFree = await checkFree()
-      if (isFree) {
-        doGenerate(prompt)
-      } else {
-        setKeyError(null)
-        setShowPayment(true)
-      }
-    } finally {
-      setChecking(false)
+
+    const isFree = await checkFree()
+    if (isFree) {
+      doGenerate(prompt)
+    } else {
+      setKeyError(null)
+      setShowPayment(true)
     }
   }
 
@@ -84,21 +77,15 @@ function App() {
   return (
     <div className="app">
       <Hero />
-      <CreatePanel onGenerate={handleGenerate} disabled={checking} />
-      <ShowcaseGrid items={showcases} onGenerate={handleGenerate} disabled={checking} />
+      <ShowcaseGrid items={showcases} onGenerate={handleGenerate} />
+      <CreatePanel onGenerate={handleGenerate} />
       <footer className="footer">
-        <p>Powered by GPT-Image-2 &middot; Nano Banana AI</p>
+        <p>Powered by GPT-Image-2 &middot; Gpt Image 2.0</p>
       </footer>
-      <a
-        href="https://qm.qq.com/q/792496465"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="qq-float"
-        aria-label="加入QQ群"
-      >
-        <span className="qq-icon">QQ</span>
-        <span className="qq-text">交流群</span>
-      </a>
+      <div className="qq-float" aria-label="QQ群号">
+        <span className="qq-title">交流群</span>
+        <span className="qq-number">792496465</span>
+      </div>
       {showModal && (
         <GenerateModal
           loading={loading}
