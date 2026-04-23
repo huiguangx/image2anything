@@ -33,7 +33,7 @@ export function ShowcaseGrid({ items, onGenerate, loading }: ShowcaseGridProps) 
       if (!paused.current) {
         setCurrent(prev => prev >= maxIndex ? 0 : prev + 1)
       }
-    }, 4000)
+    }, 2000)
     return () => clearInterval(id)
   }, [maxIndex])
 
