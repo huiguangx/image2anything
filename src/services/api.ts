@@ -51,7 +51,10 @@ export async function generateImage(
     const res = await fetch(getGenerateUrl(), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: req.prompt }),
+      body: JSON.stringify({
+        prompt: req.prompt,
+        preferredProviders: req.preferredProviders,
+      }),
       signal: externalSignal,
     })
 
@@ -66,6 +69,7 @@ export async function generateImage(
       return {
         imageUrl: await blobToDataUrl(blob),
         prompt: req.prompt,
+        providerName: res.headers.get('x-provider-name') || undefined,
       }
     }
 
@@ -81,6 +85,7 @@ export async function generateImage(
     return {
       imageUrl: finalImageUrl,
       prompt: req.prompt,
+      providerName: res.headers.get('x-provider-name') || undefined,
     }
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') {

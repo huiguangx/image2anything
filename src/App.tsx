@@ -7,14 +7,32 @@ import { PaymentModal } from './components/PaymentModal'
 import { generateImage } from './services/api'
 import { checkFree, consumeFree, validateKey, consumeKey } from './services/quota'
 import { showcases } from './data/showcases'
-import type { GenerateResult } from './types'
+import type { GenerateSlot } from './types'
 import './App.css'
+
+const GENERATION_PLANS = [
+  { id: 'image-1', title: '图1', preferredProviders: ['1024token', 'custom'] },
+  { id: 'image-2', title: '图2', preferredProviders: ['1024token', 'custom'] },
+] as const
+
+function createLoadingSlots(): GenerateSlot[] {
+  return GENERATION_PLANS.map((plan) => ({
+    id: plan.id,
+    title: plan.title,
+    status: 'loading',
+  }))
+}
+
+function buildFinalError(messages: string[]) {
+  const firstMessage = [...new Set(messages.filter(Boolean))][0]
+  return firstMessage || '这次没有成功出图，请稍后再试一次'
+}
 
 function App() {
   const [showModal, setShowModal] = useState(false)
   const [showPayment, setShowPayment] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState<GenerateResult | null>(null)
+  const [slots, setSlots] = useState<GenerateSlot[]>([])
   const [error, setError] = useState<string | null>(null)
   const [keyError, setKeyError] = useState<string | null>(null)
   const pendingPrompt = useRef<string>('')
@@ -29,29 +47,105 @@ function App() {
     setShowPayment(false)
     setShowModal(true)
     setLoading(true)
-    setResult(null)
+    setSlots(createLoadingSlots())
     setError(null)
 
     const controller = new AbortController()
     abortRef.current = controller
+    let completedCount = 0
+    let successCount = 0
+    const failures: string[] = []
+    let quotaPromise: Promise<boolean> | null = null
 
-    try {
-      const res = await generateImage({ prompt }, { signal: controller.signal })
-      if (key) {
-        const consumed = await consumeKey(key)
-        if (!consumed) {
-          setError('密钥已被使用，请使用新密钥')
-          return
-        }
-      } else {
-        await consumeFree()
+    const updateSlot = (slotId: string, nextSlot: Partial<GenerateSlot>) => {
+      setSlots((currentSlots) =>
+        currentSlots.map((slot) => (slot.id === slotId ? { ...slot, ...nextSlot } : slot))
+      )
+    }
+
+    const consumeQuotaOnce = async () => {
+      if (quotaPromise) {
+        return quotaPromise
       }
-      setResult(res)
-    } catch (err) {
-      if (controller.signal.aborted) {
+
+      quotaPromise = (async () => {
+        if (key) {
+          const consumed = await consumeKey(key)
+          if (!consumed) {
+            throw new Error('密钥已被使用，请使用新密钥')
+          }
+          return true
+        }
+
+        const consumed = await consumeFree()
+        if (!consumed) {
+          throw new Error('免费次数扣减失败，请稍后再试')
+        }
+        return true
+      })()
+
+      return quotaPromise
+    }
+
+    const finalizeRequest = () => {
+      completedCount += 1
+      if (completedCount !== GENERATION_PLANS.length || controller.signal.aborted) {
         return
       }
-      setError(err instanceof Error ? err.message : '未知错误')
+
+      if (abortRef.current === controller) {
+        abortRef.current = null
+      }
+
+      if (successCount === 0) {
+        setError(buildFinalError(failures))
+      }
+
+      setLoading(false)
+    }
+
+    try {
+      await Promise.allSettled(
+        GENERATION_PLANS.map(async (plan) => {
+          try {
+            const res = await generateImage(
+              {
+                prompt,
+                preferredProviders: [...plan.preferredProviders],
+              },
+              { signal: controller.signal }
+            )
+
+            await consumeQuotaOnce()
+            if (controller.signal.aborted) {
+              return
+            }
+
+            successCount += 1
+            setError(null)
+            updateSlot(plan.id, {
+              status: 'success',
+              result: res,
+              error: undefined,
+              finishedAt: Date.now(),
+            })
+          } catch (err) {
+            if (controller.signal.aborted) {
+              return
+            }
+
+            const message = err instanceof Error ? err.message : '未知错误'
+            failures.push(message)
+            updateSlot(plan.id, {
+              status: 'error',
+              error: message,
+              finishedAt: Date.now(),
+            })
+          } finally {
+            finalizeRequest()
+          }
+        })
+      )
     } finally {
       if (abortRef.current === controller) {
         abortRef.current = null
@@ -62,17 +156,29 @@ function App() {
     }
   }
 
+  const showRequestError = (message: string) => {
+    setShowPayment(false)
+    setShowModal(true)
+    setLoading(false)
+    setSlots([])
+    setError(message)
+  }
+
   const handleGenerate = async (prompt: string) => {
     if (loading || abortRef.current) return
 
     pendingPrompt.current = prompt
 
-    const isFree = await checkFree()
-    if (isFree) {
-      void doGenerate(prompt)
-    } else {
-      setKeyError(null)
-      setShowPayment(true)
+    try {
+      const isFree = await checkFree()
+      if (isFree) {
+        void doGenerate(prompt)
+      } else {
+        setKeyError(null)
+        setShowPayment(true)
+      }
+    } catch (err) {
+      showRequestError(err instanceof Error ? err.message : '额度服务暂时不可用，请稍后再试')
     }
   }
 
@@ -80,12 +186,16 @@ function App() {
     if (loading || abortRef.current) return
 
     setKeyError(null)
-    const valid = await validateKey(key)
-    if (!valid) {
-      setKeyError('密钥无效或已使用')
-      return
+    try {
+      const valid = await validateKey(key)
+      if (!valid) {
+        setKeyError('密钥无效或已使用')
+        return
+      }
+      void doGenerate(pendingPrompt.current, key)
+    } catch (err) {
+      setKeyError(err instanceof Error ? err.message : '密钥校验失败，请稍后再试')
     }
-    void doGenerate(pendingPrompt.current, key)
   }
 
   const handleRetry = () => {
@@ -98,7 +208,7 @@ function App() {
     abortRef.current = null
     setLoading(false)
     setShowModal(false)
-    setResult(null)
+    setSlots([])
     setError(null)
   }
 
@@ -117,7 +227,7 @@ function App() {
       {showModal && (
         <GenerateModal
           loading={loading}
-          result={result}
+          slots={slots}
           error={error}
           onClose={handleCloseModal}
           onRetry={handleRetry}

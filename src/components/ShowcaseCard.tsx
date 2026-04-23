@@ -4,9 +4,10 @@ interface ShowcaseCardProps {
   item: ShowcaseItem
   onGenerate: (prompt: string) => void
   loading: boolean
+  priority?: boolean
 }
 
-export function ShowcaseCard({ item, onGenerate, loading }: ShowcaseCardProps) {
+export function ShowcaseCard({ item, onGenerate, loading, priority = false }: ShowcaseCardProps) {
   const canGenerate = Boolean(item.prompt)
 
   return (
@@ -15,7 +16,9 @@ export function ShowcaseCard({ item, onGenerate, loading }: ShowcaseCardProps) {
         <img
           src={item.imageUrl}
           alt={item.title}
-          loading="lazy"
+          loading={priority ? 'eager' : 'lazy'}
+          fetchPriority={priority ? 'high' : 'auto'}
+          decoding="async"
           referrerPolicy="no-referrer"
         />
         {canGenerate && (

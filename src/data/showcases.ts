@@ -5,7 +5,7 @@ export const showcases: ShowcaseItem[] = [
     id: 'beauty-photo',
     title: '美女图片',
     description: '生成栩栩如生的美女照片',
-    imageUrl: '/images/00-beauty-photo.png',
+    imageUrl: '/images/00-beauty-photo.jpg',
     prompt: '生成一张成熟性感的穿黑丝的30岁的熟女照片',
   },
   {

@@ -4,7 +4,15 @@ async function callKeysApi(body: Record<string, unknown>) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   })
-  return res.json()
+
+  const data = await res.json().catch(() => null)
+  if (!res.ok) {
+    throw new Error(
+      (data && typeof data.error === 'string' && data.error) || '额度服务暂时不可用，请稍后再试'
+    )
+  }
+
+  return data || {}
 }
 
 export async function checkFree(): Promise<boolean> {
