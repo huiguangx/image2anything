@@ -252,6 +252,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 1rem;
   z-index: 100;
 }
 
@@ -259,8 +260,10 @@
   background: #1e1e2e;
   border-radius: 16px;
   padding: 2rem;
-  max-width: 520px;
-  width: 90%;
+  max-width: 980px;
+  width: min(100%, 980px);
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
   position: relative;
 }
 
@@ -277,13 +280,95 @@
 
 .modal-loading {
   text-align: center;
-  padding: 2rem 0;
+  padding: 0.35rem 0 1rem;
 }
 
 .modal-loading-copy {
-  margin-top: 0.85rem;
   color: #f3f3f3;
   line-height: 1.6;
+  padding: 0 2.25rem;
+}
+
+.modal-slots {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.modal-slot {
+  background: #181824;
+  border: 1px solid #2d2d40;
+  border-radius: 16px;
+  padding: 0.85rem;
+  min-width: 0;
+}
+
+.modal-slot-success {
+  border-color: rgba(247, 208, 70, 0.28);
+}
+
+.modal-slot-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.modal-slot-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #f5f5fb;
+}
+
+.modal-slot-image,
+.modal-slot-placeholder {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  border-radius: 12px;
+}
+
+.modal-slot-image {
+  display: block;
+  object-fit: cover;
+  background: #101018;
+}
+
+.modal-slot-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background:
+    radial-gradient(circle at top, rgba(247, 208, 70, 0.08), transparent 48%),
+    linear-gradient(180deg, #131320, #11111a);
+  color: #dad9e6;
+  text-align: center;
+}
+
+.modal-slot-spinner {
+  width: 38px;
+  height: 38px;
+  margin: 0 0 0.9rem;
+}
+
+.modal-slot-copy {
+  line-height: 1.6;
+}
+
+.modal-slot-error {
+  font-size: 0.82rem;
+  color: #9fa0b3;
+  line-height: 1.5;
+}
+
+.modal-slot-actions {
+  margin-top: 0.85rem;
+}
+
+.modal-slot-actions .btn {
+  width: 100%;
 }
 
 .spinner {
@@ -294,6 +379,12 @@
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
   margin: 0 auto 1rem;
+}
+
+.spinner-small {
+  width: 28px;
+  height: 28px;
+  margin: 0;
 }
 
 @keyframes spin {
@@ -316,11 +407,6 @@
   margin-top: 0.5rem;
   color: #c9c9d6;
   line-height: 1.5;
-}
-
-.modal-result img {
-  width: 100%;
-  border-radius: 8px;
 }
 
 .modal-result-actions {
@@ -426,6 +512,11 @@
 
 /* Mobile */
 @media (max-width: 768px) {
+  .modal-overlay {
+    align-items: flex-start;
+    padding: 0.35rem;
+  }
+
   .app {
     padding: 1rem;
   }
@@ -469,8 +560,36 @@
   }
 
   .modal-content {
-    width: 95%;
-    padding: 1.5rem;
+    width: 100%;
+    padding: 0.9rem;
+    max-height: calc(100vh - 0.7rem);
+  }
+
+  .modal-slots {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+
+  .modal-slot {
+    padding: 0.55rem;
+  }
+
+  .modal-slot-image,
+  .modal-slot-placeholder {
+    aspect-ratio: 7 / 8;
+  }
+
+  .modal-loading-copy {
+    padding: 0 2rem;
+    font-size: 0.96rem;
+  }
+
+  .modal-slot-copy {
+    font-size: 0.95rem;
+  }
+
+  .modal-result-actions {
+    flex-direction: column;
   }
 
   .key-input-group {

@@ -53,8 +53,9 @@ export function ShowcaseGrid({ items, onGenerate, loading }: ShowcaseGridProps) 
           className="carousel-track"
           style={{ transform: `translateX(-${current * slideWidth}%)` }}
         >
-          {items.map((it) => {
+          {items.map((it, index) => {
             const canGenerate = Boolean(it.prompt)
+            const priority = index < 2
             return (
               <div
                 key={it.id}
@@ -62,7 +63,13 @@ export function ShowcaseGrid({ items, onGenerate, loading }: ShowcaseGridProps) 
                 style={{ flex: `0 0 ${slideWidth}%` }}
               >
                 <div className="carousel-slide-inner">
-                  <img src={it.imageUrl} alt={it.title} />
+                  <img
+                    src={it.imageUrl}
+                    alt={it.title}
+                    loading={priority ? 'eager' : 'lazy'}
+                    fetchPriority={priority ? 'high' : 'auto'}
+                    decoding="async"
+                  />
                   <div className="carousel-caption">
                     <h3>{it.title}</h3>
                     {it.description && <p>{it.description}</p>}
