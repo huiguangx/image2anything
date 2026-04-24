@@ -17,6 +17,20 @@ function getGenerateJobsUrl() {
   return `${getGenerateBaseUrl()}/jobs`
 }
 
+function resolveImageUrl(imageUrl: string) {
+  if (/^(data:|https?:\/\/)/.test(imageUrl)) {
+    return imageUrl
+  }
+
+  const baseUrl = getGenerateBaseUrl()
+  if (baseUrl.endsWith('/generate') && imageUrl.startsWith('/api/generate/')) {
+    const apiPrefix = baseUrl.replace(/\/generate$/, '')
+    return `${apiPrefix}${imageUrl.slice('/api'.length)}`
+  }
+
+  return imageUrl
+}
+
 async function waitForDelay(ms: number, signal?: AbortSignal) {
   return new Promise<void>((resolve, reject) => {
     if (signal?.aborted) {
@@ -122,7 +136,7 @@ async function waitForGenerateResult(
 
     if (job.status === 'succeeded' && job.imageUrl) {
       return {
-        imageUrl: job.imageUrl,
+        imageUrl: resolveImageUrl(job.imageUrl),
         prompt,
         providerName: job.providerName || undefined,
       }

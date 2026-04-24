@@ -37,7 +37,7 @@ describe('generateImage', () => {
           prompt: '一只红苹果',
           createdAt: 1,
           updatedAt: 3,
-          imageUrl: 'data:image/png;base64,abc',
+          imageUrl: '/api/generate/jobs/job-1/image',
           providerName: '1024token',
         })
       )
@@ -54,7 +54,7 @@ describe('generateImage', () => {
     await vi.advanceTimersByTimeAsync(1500)
 
     await expect(promise).resolves.toEqual({
-      imageUrl: 'data:image/png;base64,abc',
+      imageUrl: '/api/generate/jobs/job-1/image',
       prompt: '一只红苹果',
       providerName: '1024token',
     })
