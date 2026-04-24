@@ -1,5 +1,19 @@
+function getKeysUrl() {
+  const explicit = (import.meta.env.VITE_KEYS_API_URL || '').trim()
+  if (explicit) {
+    return explicit.replace(/\/+$/, '')
+  }
+
+  const generateUrl = (import.meta.env.VITE_IMAGE_API_URL || '/api/generate').trim().replace(/\/+$/, '')
+  if (generateUrl.endsWith('/generate')) {
+    return generateUrl.replace(/\/generate$/, '/keys')
+  }
+
+  return '/api/keys'
+}
+
 async function callKeysApi(body: Record<string, unknown>) {
-  const res = await fetch('/api/keys', {
+  const res = await fetch(getKeysUrl(), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),

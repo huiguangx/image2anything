@@ -57,7 +57,7 @@ export function GenerateModal({ loading, slots, error, onClose, onRetry }: Gener
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+      <div className="modal-content generate-modal-content" onClick={(e) => e.stopPropagation()}>
         <button className="modal-close" onClick={onClose} aria-label="关闭">
           &times;
         </button>

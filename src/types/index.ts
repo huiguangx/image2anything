@@ -18,6 +18,22 @@ export interface GenerateResult {
   providerName?: string
 }
 
+export type GenerateJobStatus = 'queued' | 'running' | 'succeeded' | 'failed' | 'canceled'
+
+export interface GenerateJob {
+  jobId: string
+  status: GenerateJobStatus
+  prompt: string
+  providerName?: string | null
+  imageUrl?: string
+  error?: string | null
+  errorCode?: string | null
+  retryable?: boolean
+  createdAt: number
+  updatedAt: number
+  completedAt?: number | null
+}
+
 export interface GenerateSlot {
   id: string
   title: string
