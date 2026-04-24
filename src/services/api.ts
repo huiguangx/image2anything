@@ -31,6 +31,29 @@ function resolveImageUrl(imageUrl: string) {
   return imageUrl
 }
 
+async function resolveProtectedImageUrl(imageUrl: string, userId?: string, signal?: AbortSignal) {
+  const resolved = resolveImageUrl(imageUrl)
+  if (!userId || /^(data:|https?:\/\/|blob:)/.test(resolved)) {
+    return resolved
+  }
+
+  const headers: Record<string, string> = {
+    'X-User-Id': userId,
+  }
+
+  const res = await fetch(resolved, {
+    headers,
+    signal,
+  })
+
+  if (!res.ok) {
+    await parseError(res)
+  }
+
+  const blob = await res.blob()
+  return URL.createObjectURL(blob)
+}
+
 async function waitForDelay(ms: number, signal?: AbortSignal) {
   return new Promise<void>((resolve, reject) => {
     if (signal?.aborted) {
@@ -157,8 +180,9 @@ async function waitForGenerateResult(
     }
 
     if (job.status === 'succeeded' && job.imageUrl) {
+      const securedImageUrl = await resolveProtectedImageUrl(job.imageUrl, userId, signal)
       return {
-        imageUrl: resolveImageUrl(job.imageUrl),
+        imageUrl: securedImageUrl,
         prompt,
         providerName: job.providerName || undefined,
       }
