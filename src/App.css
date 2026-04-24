@@ -357,10 +357,52 @@ body::after {
   padding: 0.6rem 1.75rem;
 }
 
+.upload-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.upload-row input[type='file'] {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+}
+
+.upload-copy {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.85rem;
+}
+
+.upload-clear {
+  background: transparent;
+  border: none;
+  color: #f7d046;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.create-error {
+  font-size: 0.82rem;
+  color: #ff6b6b;
+}
+
 .create-note {
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.45);
   margin-top: -0.35rem;
+}
+
+.create-status {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.84rem;
 }
 
 /* ---- Modals ---- */
@@ -423,6 +465,13 @@ body::after {
   max-width: 34rem;
   color: rgba(255, 255, 255, 0.85);
   line-height: 1.6;
+}
+
+.modal-loading-hint {
+  margin-top: 0.55rem;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 0.88rem;
+  line-height: 1.5;
 }
 
 .modal-slots {
@@ -662,6 +711,34 @@ body::after {
   letter-spacing: 0.04em;
 }
 
+.background-task-toast {
+  position: fixed;
+  right: 1rem;
+  bottom: 6.5rem;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  width: min(320px, calc(100vw - 2rem));
+  padding: 0.9rem 1rem;
+  border-radius: 16px;
+  border: 1px solid rgba(247, 208, 70, 0.22);
+  background: rgba(18, 18, 28, 0.92);
+  color: #fff;
+  text-align: left;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.35);
+}
+
+.background-task-title {
+  font-size: 0.94rem;
+  font-weight: 600;
+}
+
+.background-task-copy {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.66);
+}
+
 /* ---- Mobile ---- */
 @media (max-width: 768px) {
   body::before {
@@ -696,6 +773,14 @@ body::after {
   .carousel-caption h3 { font-size: 1rem; }
 
   .create-form textarea { font-size: 0.9rem; }
+
+  .upload-copy {
+    font-size: 0.8rem;
+  }
+
+  .create-status {
+    font-size: 0.8rem;
+  }
 
   .generate-modal-content {
     width: 100%;
@@ -741,6 +826,11 @@ body::after {
     font-size: 0.93rem;
   }
 
+  .modal-loading-hint {
+    padding: 0 1.1rem;
+    font-size: 0.8rem;
+  }
+
   .modal-slot-copy {
     font-size: 0.82rem;
     line-height: 1.45;
@@ -778,6 +868,14 @@ body::after {
     right: 1rem;
     padding: 0.65rem 0.85rem;
     font-size: 0.8rem;
+  }
+
+  .background-task-toast {
+    right: 1rem;
+    left: 1rem;
+    bottom: 5.8rem;
+    width: auto;
+    padding: 0.82rem 0.9rem;
   }
 }
 

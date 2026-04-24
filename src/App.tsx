@@ -1,19 +1,26 @@
-import { useState, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Hero } from './components/Hero'
 import { ShowcaseGrid } from './components/ShowcaseGrid'
 import { CreatePanel } from './components/CreatePanel'
 import { GenerateModal } from './components/GenerateModal'
 import { PaymentModal } from './components/PaymentModal'
+import { AccountModal } from './components/AccountModal'
 import { generateImage } from './services/api'
-import { checkFree, consumeFree, validateKey, consumeKey } from './services/quota'
+import { checkFree, consumeCredit, consumeFree, consumeKey, getQuotaStatus, validateKey } from './services/quota'
+import { ensureSession, fetchUserJobs, registerAccount } from './services/session'
 import { showcases } from './data/showcases'
-import type { GenerateSlot } from './types'
+import type { BackgroundGenerationState, GenerateSlot, SessionUser } from './types'
 import './App.css'
 
 const GENERATION_PLANS = [
   { id: 'image-1', title: '图1', preferredProviders: ['1024token', 'custom'] },
   { id: 'image-2', title: '图2', preferredProviders: ['1024token', 'custom'] },
 ] as const
+
+type AccessMode = 'free' | 'credit'
+type PendingAction = 'generate' | 'image'
+
+const BACKGROUND_CLOSE_THRESHOLD_MS = 90_000
 
 function createLoadingSlots(): GenerateSlot[] {
   return GENERATION_PLANS.map((plan) => ({
@@ -28,34 +35,128 @@ function buildFinalError(messages: string[]) {
   return firstMessage || '这次没有成功出图，请稍后再试一次'
 }
 
+function buildUserLabel(user: SessionUser | null) {
+  if (!user) return ''
+  if (user.role === 'account') {
+    return `当前账号：${user.profileName || user.id}`
+  }
+  return '当前为游客模式'
+}
+
+function buildCreditText(user: SessionUser | null) {
+  if (!user) return ''
+  if (user.role === 'account') {
+    return `账号剩余 ${user.credits} 次，可直接生成和图生图`
+  }
+  return '游客可免费文生图 2 次，图生图和付费阶段需要注册'
+}
+
+function buildBackgroundToast(slots: GenerateSlot[]) {
+  const successCount = slots.filter((slot) => slot.status === 'success').length
+  const loadingCount = slots.filter((slot) => slot.status === 'loading').length
+  const errorCount = slots.filter((slot) => slot.status === 'error').length
+
+  if (loadingCount > 0) {
+    return {
+      title: successCount > 0 ? `已出 ${successCount}/2 张，另一张还在生成` : '图片仍在生成中',
+      copy: '点这里继续查看结果',
+    }
+  }
+
+  if (successCount > 0) {
+    return {
+      title: `已完成 ${successCount}/2 张`,
+      copy: errorCount > 0 ? '有部分结果失败，点这里查看详情' : '点这里查看和下载结果',
+    }
+  }
+
+  return {
+    title: '这次生成没有成功',
+    copy: '点这里查看失败原因',
+  }
+}
+
 function App() {
   const [showModal, setShowModal] = useState(false)
   const [showPayment, setShowPayment] = useState(false)
+  const [showAccount, setShowAccount] = useState(false)
   const [loading, setLoading] = useState(false)
   const [slots, setSlots] = useState<GenerateSlot[]>([])
   const [error, setError] = useState<string | null>(null)
   const [keyError, setKeyError] = useState<string | null>(null)
+  const [accountError, setAccountError] = useState<string | null>(null)
+  const [user, setUser] = useState<SessionUser | null>(null)
+  const [initializing, setInitializing] = useState(true)
+  const [backgroundGeneration, setBackgroundGeneration] = useState<BackgroundGenerationState | null>(null)
+  const [requestStartedAt, setRequestStartedAt] = useState<number | null>(null)
+  const [backgroundCloseReady, setBackgroundCloseReady] = useState(false)
   const pendingPrompt = useRef<string>('')
-  const pendingKey = useRef<string | undefined>(undefined)
+  const pendingImage = useRef<string | undefined>(undefined)
+  const pendingMode = useRef<AccessMode>('free')
+  const pendingAction = useRef<PendingAction>('generate')
   const abortRef = useRef<AbortController | null>(null)
 
-  const doGenerate = async (prompt: string, key?: string) => {
-    if (loading || abortRef.current) return
+  useEffect(() => {
+    let active = true
+
+    const bootstrap = async () => {
+      try {
+        const nextUser = await ensureSession()
+        if (!active) return
+        setUser(nextUser)
+        if (nextUser?.id) {
+          void getQuotaStatus(nextUser.id).catch(() => undefined)
+          if (nextUser.role === 'account') {
+            void fetchUserJobs(nextUser.id).catch(() => [])
+          }
+        }
+      } catch (err) {
+        if (!active) return
+        setError(err instanceof Error ? err.message : '初始化会话失败，请刷新重试')
+      } finally {
+        if (active) {
+          setInitializing(false)
+        }
+      }
+    }
+
+    void bootstrap()
+
+    return () => {
+      active = false
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!backgroundGeneration) {
+      return
+    }
+
+    setBackgroundGeneration((current) => (current ? { ...current, slots } : current))
+  }, [slots])
+
+  const doGenerate = async (prompt: string, mode: AccessMode, image?: string) => {
+    if (loading || abortRef.current || !user) return
 
     pendingPrompt.current = prompt
-    pendingKey.current = key
+    pendingImage.current = image
+    pendingMode.current = mode
     setShowPayment(false)
+    setShowAccount(false)
     setShowModal(true)
     setLoading(true)
     setSlots(createLoadingSlots())
     setError(null)
+    setBackgroundGeneration(null)
+    setRequestStartedAt(Date.now())
+    setBackgroundCloseReady(false)
 
     const controller = new AbortController()
     abortRef.current = controller
     let completedCount = 0
     let successCount = 0
     const failures: string[] = []
-    let quotaPromise: Promise<boolean> | null = null
+    let quotaPromise: Promise<void> | null = null
 
     const updateSlot = (slotId: string, nextSlot: Partial<GenerateSlot>) => {
       setSlots((currentSlots) =>
@@ -69,19 +170,16 @@ function App() {
       }
 
       quotaPromise = (async () => {
-        if (key) {
-          const consumed = await consumeKey(key)
-          if (!consumed) {
-            throw new Error('密钥已被使用，请使用新密钥')
-          }
-          return true
+        if (mode === 'credit') {
+          const nextCredits = await consumeCredit(user.id)
+          setUser((current) => (current ? { ...current, credits: nextCredits } : current))
+          return
         }
 
-        const consumed = await consumeFree()
+        const consumed = await consumeFree(user.id)
         if (!consumed) {
           throw new Error('免费次数扣减失败，请稍后再试')
         }
-        return true
       })()
 
       return quotaPromise
@@ -108,15 +206,20 @@ function App() {
       await Promise.allSettled(
         GENERATION_PLANS.map(async (plan) => {
           try {
+            await consumeQuotaOnce()
+            if (controller.signal.aborted) {
+              return
+            }
+
             const res = await generateImage(
               {
                 prompt,
+                image,
+                userId: user.id,
                 preferredProviders: [...plan.preferredProviders],
               },
               { signal: controller.signal }
             )
-
-            await consumeQuotaOnce()
             if (controller.signal.aborted) {
               return
             }
@@ -152,47 +255,125 @@ function App() {
       }
       if (!controller.signal.aborted) {
         setLoading(false)
+        setRequestStartedAt(null)
+        setBackgroundCloseReady(false)
       }
     }
   }
 
   const showRequestError = (message: string) => {
     setShowPayment(false)
+    setShowAccount(false)
     setShowModal(true)
     setLoading(false)
     setSlots([])
     setError(message)
   }
 
-  const handleGenerate = async (prompt: string) => {
-    if (loading || abortRef.current) return
+  const handleGenerate = async (prompt: string, image?: string) => {
+    if (loading || abortRef.current || initializing || !user) return
 
     pendingPrompt.current = prompt
+    pendingImage.current = image
+    pendingAction.current = image ? 'image' : 'generate'
 
     try {
-      const isFree = await checkFree()
+      if (image) {
+        if (user.role !== 'account') {
+          setAccountError(null)
+          setShowAccount(true)
+          return
+        }
+
+        if (user.credits <= 0) {
+          setKeyError(null)
+          setShowPayment(true)
+          return
+        }
+
+        void doGenerate(prompt, 'credit', image)
+        return
+      }
+
+      const isFree = await checkFree(user.id)
       if (isFree) {
-        void doGenerate(prompt)
-      } else {
+        void doGenerate(prompt, 'free')
+        return
+      }
+
+      if (user.role !== 'account') {
+        setAccountError(null)
+        setShowAccount(true)
+        return
+      }
+
+      if (user.credits <= 0) {
         setKeyError(null)
         setShowPayment(true)
+        return
       }
+
+      void doGenerate(prompt, 'credit')
     } catch (err) {
       showRequestError(err instanceof Error ? err.message : '额度服务暂时不可用，请稍后再试')
     }
   }
 
+  const handleRegisterSubmit = async (profileName: string) => {
+    if (!user) return
+
+    setAccountError(null)
+    try {
+      const nextUser = await registerAccount(profileName, user.id)
+      setUser(nextUser)
+      setShowAccount(false)
+
+      if (pendingAction.current === 'image') {
+        if (nextUser.credits > 0) {
+          void doGenerate(pendingPrompt.current, 'credit', pendingImage.current)
+        } else {
+          setShowPayment(true)
+        }
+        return
+      }
+
+      if (nextUser.credits > 0) {
+        void doGenerate(pendingPrompt.current, 'credit', pendingImage.current)
+      } else {
+        setShowPayment(true)
+      }
+    } catch (err) {
+      setAccountError(err instanceof Error ? err.message : '创建账号失败，请稍后再试')
+    }
+  }
+
   const handleKeySubmit = async (key: string) => {
-    if (loading || abortRef.current) return
+    if (loading || abortRef.current || !user) return
 
     setKeyError(null)
     try {
-      const valid = await validateKey(key)
+      const valid = await validateKey(key, user.id)
       if (!valid) {
         setKeyError('密钥无效或已使用')
         return
       }
-      void doGenerate(pendingPrompt.current, key)
+
+      const consumed = await consumeKey(key, user.id)
+      if (!consumed) {
+        setKeyError('密钥充值失败，请稍后再试')
+        return
+      }
+
+      const status = await getQuotaStatus(user.id)
+      const nextUser = status.user as SessionUser | undefined
+      if (nextUser) {
+        setUser(nextUser)
+      }
+      setShowPayment(false)
+
+      if ((nextUser?.credits || 0) > 0) {
+        void doGenerate(pendingPrompt.current, 'credit', pendingImage.current)
+      }
     } catch (err) {
       setKeyError(err instanceof Error ? err.message : '密钥校验失败，请稍后再试')
     }
@@ -200,23 +381,42 @@ function App() {
 
   const handleRetry = () => {
     if (loading || abortRef.current || !pendingPrompt.current) return
-    void doGenerate(pendingPrompt.current, pendingKey.current)
+    void doGenerate(pendingPrompt.current, pendingMode.current, pendingImage.current)
   }
 
   const handleCloseModal = () => {
+    if (loading && backgroundCloseReady) {
+      setBackgroundGeneration({
+        prompt: pendingPrompt.current,
+        image: pendingImage.current,
+        slots,
+        startedAt: requestStartedAt || Date.now(),
+      })
+      setShowModal(false)
+      setError(null)
+      return
+    }
+
     abortRef.current?.abort()
     abortRef.current = null
     setLoading(false)
     setShowModal(false)
     setSlots([])
     setError(null)
+    setRequestStartedAt(null)
+    setBackgroundCloseReady(false)
   }
 
   return (
     <div className="app">
       <Hero />
-      <ShowcaseGrid items={showcases} onGenerate={handleGenerate} loading={loading} />
-      <CreatePanel onGenerate={handleGenerate} loading={loading} />
+      <ShowcaseGrid items={showcases} onGenerate={(prompt) => void handleGenerate(prompt)} loading={loading || initializing} />
+      <CreatePanel
+        onGenerate={handleGenerate}
+        loading={loading || initializing}
+        userLabel={buildUserLabel(user)}
+        creditText={buildCreditText(user)}
+      />
       <footer className="footer">
         <p>Powered by GPT-Image-2 &middot; Gpt Image 2.0</p>
       </footer>
@@ -231,13 +431,39 @@ function App() {
           error={error}
           onClose={handleCloseModal}
           onRetry={handleRetry}
+          allowBackgroundClose={backgroundCloseReady}
+          backgroundCloseThresholdSeconds={BACKGROUND_CLOSE_THRESHOLD_MS / 1000}
+          onBackgroundCloseReady={() => setBackgroundCloseReady(true)}
         />
+      )}
+      {!showModal && backgroundGeneration && (
+        <button
+          type="button"
+          className="background-task-toast"
+          onClick={() => {
+            setShowModal(true)
+            setSlots(backgroundGeneration.slots)
+          }}
+        >
+          <span className="background-task-title">{buildBackgroundToast(backgroundGeneration.slots).title}</span>
+          <span className="background-task-copy">{buildBackgroundToast(backgroundGeneration.slots).copy}</span>
+        </button>
       )}
       {showPayment && (
         <PaymentModal
           onClose={() => setShowPayment(false)}
           onKeySubmit={handleKeySubmit}
           error={keyError}
+          credits={user?.credits || 0}
+        />
+      )}
+      {showAccount && (
+        <AccountModal
+          onClose={() => setShowAccount(false)}
+          onSubmit={handleRegisterSubmit}
+          error={accountError}
+          title="先创建一个轻账号"
+          subtitle="游客可免费文生图 2 次；图生图和付费阶段需要账号，注册后可记录额度和任务。"
         />
       )}
     </div>

@@ -72,11 +72,18 @@ async function parseError(res: Response) {
 }
 
 async function createGenerateJob(req: GenerateRequest, signal?: AbortSignal) {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+  if (req.userId) {
+    headers['X-User-Id'] = req.userId
+  }
+
   const res = await fetch(getGenerateJobsUrl(), {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify({
       prompt: req.prompt,
+      image: req.image,
+      userId: req.userId,
       preferredProviders: req.preferredProviders,
     }),
     signal,
@@ -96,8 +103,16 @@ async function createGenerateJob(req: GenerateRequest, signal?: AbortSignal) {
   return jobId
 }
 
-async function getGenerateJob(jobId: string, signal?: AbortSignal): Promise<GenerateJob> {
-  const res = await fetch(`${getGenerateJobsUrl()}/${encodeURIComponent(jobId)}`, { signal })
+async function getGenerateJob(jobId: string, userId?: string, signal?: AbortSignal): Promise<GenerateJob> {
+  const headers: Record<string, string> = {}
+  if (userId) {
+    headers['X-User-Id'] = userId
+  }
+
+  const res = await fetch(`${getGenerateJobsUrl()}/${encodeURIComponent(jobId)}`, {
+    signal,
+    headers,
+  })
 
   if (!res.ok) {
     await parseError(res)
@@ -111,10 +126,16 @@ async function getGenerateJob(jobId: string, signal?: AbortSignal): Promise<Gene
   return data as GenerateJob
 }
 
-async function cancelGenerateJob(jobId: string) {
+async function cancelGenerateJob(jobId: string, userId?: string) {
   try {
+    const headers: Record<string, string> = {}
+    if (userId) {
+      headers['X-User-Id'] = userId
+    }
+
     await fetch(`${getGenerateJobsUrl()}/${encodeURIComponent(jobId)}`, {
       method: 'DELETE',
+      headers,
     })
   } catch {
     // Ignore best-effort cancellation failures.
@@ -124,10 +145,11 @@ async function cancelGenerateJob(jobId: string) {
 async function waitForGenerateResult(
   jobId: string,
   prompt: string,
+  userId?: string,
   signal?: AbortSignal
 ): Promise<GenerateResult> {
   while (true) {
-    const job = await getGenerateJob(jobId, signal)
+    const job = await getGenerateJob(jobId, userId, signal)
 
     if (job.status === 'queued' || job.status === 'running') {
       await waitForDelay(GENERATE_JOB_POLL_INTERVAL_MS, signal)
@@ -169,7 +191,7 @@ export async function generateImage(
   const handleAbort = () => {
     if (jobId && !cancelRequested) {
       cancelRequested = true
-      void cancelGenerateJob(jobId)
+      void cancelGenerateJob(jobId, req.userId)
     }
   }
 
@@ -177,12 +199,12 @@ export async function generateImage(
 
   try {
     jobId = await createGenerateJob(req, externalSignal)
-    return await waitForGenerateResult(jobId, req.prompt, externalSignal)
+    return await waitForGenerateResult(jobId, req.prompt, req.userId, externalSignal)
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') {
       if (jobId && !cancelRequested) {
         cancelRequested = true
-        await cancelGenerateJob(jobId)
+        await cancelGenerateJob(jobId, req.userId)
       }
       throw error
     }

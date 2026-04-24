@@ -10,6 +10,7 @@ export interface GenerateRequest {
   prompt: string
   image?: string
   preferredProviders?: string[]
+  userId?: string
 }
 
 export interface GenerateResult {
@@ -24,6 +25,7 @@ export interface GenerateJob {
   jobId: string
   status: GenerateJobStatus
   prompt: string
+  mode?: 'text' | 'image'
   providerName?: string | null
   imageUrl?: string
   error?: string | null
@@ -34,6 +36,13 @@ export interface GenerateJob {
   completedAt?: number | null
 }
 
+export interface SessionUser {
+  id: string
+  role: 'guest' | 'account'
+  credits: number
+  profileName?: string | null
+}
+
 export interface GenerateSlot {
   id: string
   title: string
@@ -41,4 +50,11 @@ export interface GenerateSlot {
   result?: GenerateResult
   error?: string
   finishedAt?: number
+}
+
+export interface BackgroundGenerationState {
+  prompt: string
+  slots: GenerateSlot[]
+  startedAt: number
+  image?: string
 }

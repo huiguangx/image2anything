@@ -12,10 +12,15 @@ function getKeysUrl() {
   return '/api/keys'
 }
 
-async function callKeysApi(body: Record<string, unknown>) {
+async function callKeysApi(body: Record<string, unknown>, userId?: string) {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+  if (userId) {
+    headers['X-User-Id'] = userId
+  }
+
   const res = await fetch(getKeysUrl(), {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify(body),
   })
 
@@ -29,22 +34,31 @@ async function callKeysApi(body: Record<string, unknown>) {
   return data || {}
 }
 
-export async function checkFree(): Promise<boolean> {
-  const data = await callKeysApi({ action: 'check_free' })
+export async function checkFree(userId?: string): Promise<boolean> {
+  const data = await callKeysApi({ action: 'check_free' }, userId)
   return !!data.free
 }
 
-export async function consumeFree(): Promise<boolean> {
-  const data = await callKeysApi({ action: 'consume_free' })
+export async function consumeFree(userId?: string): Promise<boolean> {
+  const data = await callKeysApi({ action: 'consume_free' }, userId)
   return !!data.ok
 }
 
-export async function validateKey(key: string): Promise<boolean> {
-  const data = await callKeysApi({ action: 'validate', key })
+export async function validateKey(key: string, userId?: string): Promise<boolean> {
+  const data = await callKeysApi({ action: 'validate', key }, userId)
   return data.valid
 }
 
-export async function consumeKey(key: string): Promise<boolean> {
-  const data = await callKeysApi({ action: 'consume', key })
+export async function consumeKey(key: string, userId?: string): Promise<boolean> {
+  const data = await callKeysApi({ action: 'consume', key }, userId)
   return !!data.ok
+}
+
+export async function consumeCredit(userId: string): Promise<number> {
+  const data = await callKeysApi({ action: 'consume_credit' }, userId)
+  return Number(data.credits || 0)
+}
+
+export async function getQuotaStatus(userId?: string) {
+  return callKeysApi({ action: 'status' }, userId)
 }

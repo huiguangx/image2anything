@@ -4,11 +4,12 @@ interface PaymentModalProps {
   onClose: () => void
   onKeySubmit: (key: string) => void
   error?: string | null
+  credits?: number
 }
 
 const STORE_URL = 'https://pay.ldxp.cn/shop/W6P0CQSH'
 
-export function PaymentModal({ onClose, onKeySubmit, error }: PaymentModalProps) {
+export function PaymentModal({ onClose, onKeySubmit, error, credits = 0 }: PaymentModalProps) {
   const [key, setKey] = useState('')
 
   const handleSubmit = () => {
@@ -24,8 +25,8 @@ export function PaymentModal({ onClose, onKeySubmit, error }: PaymentModalProps)
           &times;
         </button>
         <div className="payment-modal">
-          <h3>输入密钥开始生成</h3>
-          <p>购买密钥后输入即可生成图片，每个密钥可用一次</p>
+          <h3>充值账号额度</h3>
+          <p>当前账号剩余 {credits} 次。输入密钥后会充值到账号里，之后可直接生成和使用图生图。</p>
 
           <div className="key-input-group">
             <input

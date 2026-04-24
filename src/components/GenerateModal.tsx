@@ -7,6 +7,9 @@ interface GenerateModalProps {
   error: string | null
   onClose: () => void
   onRetry: () => void
+  allowBackgroundClose?: boolean
+  backgroundCloseThresholdSeconds?: number
+  onBackgroundCloseReady?: () => void
 }
 
 const SLOT_STATUS_PRIORITY = {
@@ -15,7 +18,7 @@ const SLOT_STATUS_PRIORITY = {
   error: 2,
 } as const
 
-export function GenerateModal({ loading, slots, error, onClose, onRetry }: GenerateModalProps) {
+export function GenerateModal({ loading, slots, error, onClose, onRetry, allowBackgroundClose = false, backgroundCloseThresholdSeconds = 90, onBackgroundCloseReady }: GenerateModalProps) {
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
   const isCapacityIssue = Boolean(error && /资源|再试|排队|紧张/.test(error))
   const orderedSlots = [...slots].sort((left, right) => {
@@ -44,6 +47,12 @@ export function GenerateModal({ loading, slots, error, onClose, onRetry }: Gener
     return () => window.clearInterval(timer)
   }, [loading])
 
+  useEffect(() => {
+    if (loading && elapsedSeconds >= backgroundCloseThresholdSeconds) {
+      onBackgroundCloseReady?.()
+    }
+  }, [loading, elapsedSeconds, backgroundCloseThresholdSeconds, onBackgroundCloseReady])
+
   const successCount = orderedSlots.filter((slot) => slot.status === 'success').length
   const loadingCount = orderedSlots.filter((slot) => slot.status === 'loading').length
   const loadingText =
@@ -53,7 +62,9 @@ export function GenerateModal({ loading, slots, error, onClose, onRetry }: Gener
         ? '已经收到您的超绝想法，正在出图中！(๑•̀ㅂ•́)و✧'
         : elapsedSeconds < 60
           ? '请您耐心等待，正在为您出超绝美图 (≧▽≦)♡'
-          : '太火爆啦，模型正在努力生成中，请您再耐心等一下喔！(｡•̀ᴗ-)✧'
+          : elapsedSeconds < backgroundCloseThresholdSeconds
+            ? '太火爆啦，模型正在努力生成中，请您再耐心等一下喔！(｡•̀ᴗ-)✧'
+            : '这张图生成得比较久，您可以先关闭弹窗，系统会继续在后台生成。'
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -65,6 +76,9 @@ export function GenerateModal({ loading, slots, error, onClose, onRetry }: Gener
         {loading && (
           <div className="modal-loading">
             <p className="modal-loading-copy">{loadingText}</p>
+            {elapsedSeconds >= backgroundCloseThresholdSeconds && (
+              <p className="modal-loading-hint">关闭后不会取消任务，稍后可以从页面右下角重新查看结果。</p>
+            )}
           </div>
         )}
 
@@ -126,6 +140,14 @@ export function GenerateModal({ loading, slots, error, onClose, onRetry }: Gener
                 关闭
               </button>
             </div>
+          </div>
+        )}
+
+        {loading && allowBackgroundClose && (
+          <div className="modal-result-actions">
+            <button className="btn btn-secondary" onClick={onClose}>
+              先回页面等待
+            </button>
           </div>
         )}
       </div>
