@@ -420,8 +420,19 @@ function App() {
       <footer className="footer">
         <p>Powered by GPT-Image-2 &middot; Gpt Image 2.0</p>
       </footer>
-      <div className="qq-float" aria-label="QQ群号">
-        <span className="qq-title">交流群</span>
+      <a
+        className="about-float"
+        href="https://space.bilibili.com/3105089?spm_id_from=333.1007.0.0"
+        target="_blank"
+        rel="noreferrer"
+        aria-label="关于我：以太与弦"
+      >
+        <span className="about-title">关于我：以太与弦</span>
+        <span className="about-copy">在职大厂研发</span>
+        <span className="about-copy">在AI时代希望用AI实现一些梦想</span>
+      </a>
+      <div className="qq-float" aria-label="售后QQ群号">
+        <span className="qq-title">售后QQ群</span>
         <span className="qq-number">792496465</span>
       </div>
       {showModal && (

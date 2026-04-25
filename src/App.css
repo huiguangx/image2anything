@@ -674,7 +674,46 @@ body::after {
   font-size: 0.85rem;
 }
 
-/* ---- QQ Float ---- */
+/* ---- Fixed Info Cards ---- */
+.about-float {
+  position: fixed;
+  bottom: 2rem;
+  left: 2rem;
+  max-width: 280px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #fff;
+  border-radius: 16px;
+  padding: 0.78rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.18rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.22);
+  z-index: 50;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  text-decoration: none;
+  transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+}
+
+.about-float:hover {
+  border-color: rgba(247, 208, 70, 0.34);
+  box-shadow: 0 4px 32px rgba(247, 208, 70, 0.16);
+  transform: translateY(-2px);
+}
+
+.about-title {
+  font-weight: 700;
+  color: #f7d046;
+}
+
+.about-copy {
+  color: rgba(255, 255, 255, 0.72);
+}
+
 .qq-float {
   position: fixed;
   bottom: 2rem;
@@ -957,6 +996,15 @@ body::after {
   .key-input {
     width: 100%;
     max-width: 200px;
+  }
+
+  .about-float {
+    bottom: 1rem;
+    left: 1rem;
+    max-width: calc(100vw - 8.25rem);
+    padding: 0.64rem 0.72rem;
+    font-size: 0.72rem;
+    border-radius: 14px;
   }
 
   .qq-float {
