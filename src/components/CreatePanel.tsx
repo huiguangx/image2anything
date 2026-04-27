@@ -101,7 +101,7 @@ export function CreatePanel({ onGenerate, loading, userLabel, creditText }: Crea
         >
           {loading ? '生成中...' : '开始生成'}
         </button>
-        <p className="create-note">（前两次免费，之后按次收费~）</p>
+        <p className="create-note">（首次免费，之后按次收费~）</p>
         {(userLabel || creditText) && (
           <div className="create-status">
             {userLabel && <span>{userLabel}</span>}

@@ -48,7 +48,7 @@ function buildCreditText(user: SessionUser | null) {
   if (user.role === 'account') {
     return `账号剩余 ${user.credits} 次，可直接生成和图生图`
   }
-  return '游客可免费文生图 2 次，图生图和付费阶段需要注册'
+  return '游客可免费文生图 1 次，图生图和付费阶段需要注册'
 }
 
 function buildBackgroundToast(slots: GenerateSlot[]) {
@@ -474,7 +474,7 @@ function App() {
           onSubmit={handleRegisterSubmit}
           error={accountError}
           title="先创建一个轻账号"
-          subtitle="游客可免费文生图 2 次；图生图和付费阶段需要账号，注册后可记录额度和任务。"
+          subtitle="游客可免费文生图 1 次；图生图和付费阶段需要账号，注册后可记录额度和任务。"
         />
       )}
     </div>
