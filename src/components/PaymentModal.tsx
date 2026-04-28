@@ -7,7 +7,7 @@ interface PaymentModalProps {
   credits?: number
 }
 
-const STORE_URL = 'https://pay.ldxp.cn/shop/W6P0CQSH'
+const STORE_URL = 'https://token.justicewonderful.top'
 
 export function PaymentModal({ onClose, onKeySubmit, error, credits = 0 }: PaymentModalProps) {
   const [key, setKey] = useState('')
@@ -58,7 +58,7 @@ export function PaymentModal({ onClose, onKeySubmit, error, credits = 0 }: Payme
             rel="noopener noreferrer"
             className="btn btn-secondary"
           >
-            前往购买密钥
+            GPT 5.5 Pro/Plus 超稳定地址
           </a>
         </div>
       </div>

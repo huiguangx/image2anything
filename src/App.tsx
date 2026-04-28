@@ -431,6 +431,16 @@ function App() {
         <span className="about-copy">在职大厂研发</span>
         <span className="about-copy">在AI时代希望用AI实现一些梦想</span>
       </a>
+      <a
+        className="store-float"
+        href="https://token.justicewonderful.top"
+        target="_blank"
+        rel="noreferrer"
+        aria-label="GPT 5.5 Pro/Plus 超稳定地址"
+      >
+        <span className="store-title">购买地址</span>
+        <span className="store-copy">GPT 5.5 Pro/Plus 超稳定地址</span>
+      </a>
       <div className="qq-float" aria-label="售后QQ群号">
         <span className="qq-title">售后QQ群</span>
         <span className="qq-number">792496465</span>
