@@ -43,12 +43,12 @@ function buildUserLabel(user: SessionUser | null) {
   return '当前为游客模式'
 }
 
-function buildCreditText(user: SessionUser | null) {
+function buildCreditText(user: SessionUser | null, freeQuota: number | null) {
   if (!user) return ''
   if (user.role === 'account') {
     return `账号剩余 ${user.credits} 次，可直接生成和图生图`
   }
-  return '游客可免费文生图 1 次，图生图和付费阶段需要注册'
+  return `游客可免费文生图 ${freeQuota ?? 10} 次，图生图和付费阶段需要注册`
 }
 
 function buildBackgroundToast(slots: GenerateSlot[]) {
@@ -86,6 +86,7 @@ function App() {
   const [keyError, setKeyError] = useState<string | null>(null)
   const [accountError, setAccountError] = useState<string | null>(null)
   const [user, setUser] = useState<SessionUser | null>(null)
+  const [freeQuota, setFreeQuota] = useState<number | null>(null)
   const [initializing, setInitializing] = useState(true)
   const [backgroundGeneration, setBackgroundGeneration] = useState<BackgroundGenerationState | null>(null)
   const [requestStartedAt, setRequestStartedAt] = useState<number | null>(null)
@@ -105,7 +106,15 @@ function App() {
         if (!active) return
         setUser(nextUser)
         if (nextUser?.id) {
-          void getQuotaStatus(nextUser.id).catch(() => undefined)
+          void getQuotaStatus(nextUser.id)
+            .then((status) => {
+              if (!active) return
+              const nextFreeQuota = Number(status.freeQuota)
+              if (Number.isFinite(nextFreeQuota) && nextFreeQuota >= 0) {
+                setFreeQuota(nextFreeQuota)
+              }
+            })
+            .catch(() => undefined)
           if (nextUser.role === 'account') {
             void fetchUserJobs(nextUser.id).catch(() => [])
           }
@@ -366,6 +375,10 @@ function App() {
 
       const status = await getQuotaStatus(user.id)
       const nextUser = status.user as SessionUser | undefined
+      const nextFreeQuota = Number(status.freeQuota)
+      if (Number.isFinite(nextFreeQuota) && nextFreeQuota >= 0) {
+        setFreeQuota(nextFreeQuota)
+      }
       if (nextUser) {
         setUser(nextUser)
       }
@@ -415,7 +428,7 @@ function App() {
         onGenerate={handleGenerate}
         loading={loading || initializing}
         userLabel={buildUserLabel(user)}
-        creditText={buildCreditText(user)}
+        creditText={buildCreditText(user, freeQuota)}
       />
       <footer className="footer">
         <p>Powered by GPT-Image-2 &middot; Gpt Image 2.0</p>
@@ -482,7 +495,7 @@ function App() {
           onSubmit={handleRegisterSubmit}
           error={accountError}
           title="先创建一个轻账号"
-          subtitle="游客可免费文生图 1 次；图生图和付费阶段需要账号，注册后可记录额度和任务。"
+          subtitle={`游客可免费文生图 ${freeQuota ?? 10} 次；图生图和付费阶段需要账号，注册后可记录额度和任务。`}
         />
       )}
     </div>
